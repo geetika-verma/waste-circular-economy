@@ -1,0 +1,2630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SwachhConnect — Phase 0 + Phase 2 Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:#1B6B3A; --green-mid:#2D8A52; --green-light:#E8F5EE; --green-pale:#F2FAF5;
+  --amber:#D97706; --amber-light:#FEF3C7;
+  --red:#DC2626; --ink:#111827; --ink-2:#374151; --ink-3:#6B7280; --ink-4:#9CA3AF;
+  --border:#E5E7EB; --border-mid:#D1D5DB; --bg:#FAFAF9; --bg-card:#FFFFFF;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  --shadow-lg:0 12px 32px rgba(0,0,0,.12),0 4px 8px rgba(0,0,0,.06);
+  --radius:14px; --radius-sm:9px;
+  --font-display:'Tiro Devanagari Hindi',serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{font-family:var(--font-body);background:#1a2e1f;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+
+/* PHONE SHELL */
+.phone-shell{width:393px;height:852px;background:var(--bg);border-radius:52px;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 0 10px #0f1a12,0 0 0 11px #2d3d2f,var(--shadow-lg);overflow:hidden;position:relative;display:flex;flex-direction:column}
+
+/* STATUS BAR */
+.status-bar{height:50px;background:var(--green);display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 8px;flex-shrink:0}
+.status-time{font-size:13px;font-weight:600;color:white;font-family:var(--font-mono)}
+.status-icons{display:flex;align-items:center;gap:5px}
+.status-icons span{font-size:11px;color:rgba(255,255,255,.9)}
+
+/* HEADER */
+.app-header{background:var(--green);padding:10px 16px 14px;flex-shrink:0;position:relative;overflow:hidden}
+.app-header::after{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none}
+.header-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.app-logo{display:flex;flex-direction:column;flex:1;min-width:0}
+.logo-en{font-family:var(--font-display);font-size:20px;color:white;line-height:1}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.6);margin-top:2px;font-weight:300}
+.header-right{display:flex;align-items:center;gap:6px;flex-shrink:0;position:relative;z-index:2}
+.header-beta{font-size:10px;font-weight:500;background:rgba(255,255,255,.15);color:white;padding:3px 8px;border-radius:20px;border:1px solid rgba(255,255,255,.2)}
+
+/* LANGUAGE TOGGLE */
+.lang-toggle{display:flex;background:rgba(0,0,0,.25);border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,.15)}
+.lang-btn{padding:4px 9px;font-size:11px;font-weight:600;color:rgba(255,255,255,.6);background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:all .15s;white-space:nowrap}
+.lang-btn.active{background:white;color:var(--green);border-radius:18px}
+
+.location-row{margin-top:8px;display:flex;align-items:center;gap:6px}
+.loc-dot{width:7px;height:7px;background:#6EE7A0;border-radius:50%;box-shadow:0 0 6px #6EE7A0;flex-shrink:0;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.location-text{font-size:12px;color:rgba(255,255,255,.85)}
+.location-change{font-size:11px;color:rgba(255,255,255,.5);margin-left:auto;cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.3)}
+
+/* NAV */
+.nav-bar{background:var(--bg-card);border-bottom:1px solid var(--border);flex-shrink:0}
+.nav-row{display:flex;overflow-x:auto;scrollbar-width:none}
+.nav-row::-webkit-scrollbar{display:none}
+.nav-phase-lbl{font-size:8.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 16px 1px;color:var(--ink-4);display:flex;align-items:center;gap:6px}
+.nav-phase-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+.nav-phase-lbl.p2{color:#6D28D9}
+.nav-btn{flex:0 0 auto;padding:9px 10px 7px;font-size:10px;font-family:var(--font-body);color:var(--ink-3);background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;border-bottom:2.5px solid transparent;transition:all .2s;font-weight:400;white-space:nowrap;min-width:58px}
+.nav-btn .nav-icon{font-size:16px;transition:transform .2s}
+.nav-btn.active{color:var(--green);border-bottom-color:var(--green);font-weight:500}
+.nav-btn.active .nav-icon{transform:scale(1.1)}
+.nav-btn.p2-tab.active{color:#7C3AED;border-bottom-color:#7C3AED}
+
+/* SCREENS */
+.screen-container{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;overflow-y:auto;display:none;padding-bottom:16px}
+.screen.active{display:block}
+.screen::-webkit-scrollbar{display:none}
+.screen-inner{padding-bottom:60px}
+
+/* EMERGENCY */
+.emergency-card{margin:14px 16px 0;background:linear-gradient(135deg,#7F1D1D,#991B1B);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .15s}
+.emergency-card:active{transform:scale(.98)}
+.emergency-card::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-45deg,rgba(255,255,255,.015) 0,rgba(255,255,255,.015) 2px,transparent 2px,transparent 10px)}
+.emergency-pulse{width:32px;height:32px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;position:relative}
+.emergency-pulse::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(255,255,255,.3);animation:pring 2s ease-out infinite}
+@keyframes pring{0%{transform:scale(.9);opacity:1}100%{transform:scale(1.5);opacity:0}}
+.emergency-text{flex:1}
+.emergency-title{font-size:13px;font-weight:600;color:white}
+.emergency-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px;line-height:1.4}
+.emergency-arrow{font-size:18px;color:rgba(255,255,255,.5)}
+
+/* SECTION HEADER */
+.section-header{padding:14px 16px 8px;display:flex;align-items:baseline;justify-content:space-between}
+.section-title{font-size:13px;font-weight:600;color:var(--ink-2);letter-spacing:.2px}
+.section-sub{font-size:11px;color:var(--ink-4)}
+
+/* WASTE GRID */
+.waste-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px}
+.waste-tile{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 8px 10px;text-align:center;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;animation:tileIn .3s ease both}
+.waste-tile:hover,.waste-tile:active{border-color:var(--green-mid);background:var(--green-pale);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.waste-tile.selected{border-color:var(--green);background:var(--green-light)}
+.waste-tile-icon{font-size:26px;margin-bottom:6px;display:block}
+.waste-tile-label{font-size:10.5px;color:var(--ink-2);font-weight:500;line-height:1.3}
+.waste-tile-sub{font-size:9.5px;color:var(--ink-4);margin-top:2px}
+@keyframes tileIn{from{opacity:0;transform:scale(.9) translateY(6px)}to{opacity:1;transform:none}}
+.waste-tile:nth-child(1){animation-delay:.05s}.waste-tile:nth-child(2){animation-delay:.08s}.waste-tile:nth-child(3){animation-delay:.11s}
+.waste-tile:nth-child(4){animation-delay:.14s}.waste-tile:nth-child(5){animation-delay:.17s}.waste-tile:nth-child(6){animation-delay:.20s}
+.waste-tile:nth-child(7){animation-delay:.23s}.waste-tile:nth-child(8){animation-delay:.26s}.waste-tile:nth-child(9){animation-delay:.29s}
+
+/* INFO PANEL */
+.info-panel{margin:12px 16px 0;background:var(--bg-card);border:1.5px solid var(--green-mid);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:none}
+.info-panel.visible{display:block;animation:slideIn .2s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.info-panel-header{background:var(--green);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.info-panel-title{font-size:14px;font-weight:600;color:white}
+.info-panel-close{font-size:18px;color:rgba(255,255,255,.7);cursor:pointer;background:none;border:none}
+.info-panel-body{padding:14px 16px}
+.info-desc{font-size:12.5px;color:var(--ink-2);line-height:1.65}
+.info-steps{margin-top:12px}
+.info-step{display:flex;gap:10px;margin-bottom:8px}
+.info-step-dot{width:20px;height:20px;border-radius:50%;background:var(--green-light);border:1.5px solid var(--green-mid);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--green);flex-shrink:0;margin-top:1px}
+.info-step-text{font-size:12px;color:var(--ink-2);line-height:1.5}
+.info-action{margin-top:12px}
+
+/* BUTTONS */
+.btn-primary{display:block;width:100%;background:var(--green);color:white;border:none;border-radius:9px;padding:11px;font-size:13px;font-weight:600;font-family:var(--font-body);cursor:pointer;text-align:center;transition:background .15s,transform .1s}
+.btn-primary:active{background:#155a30;transform:scale(.99)}
+.btn-secondary{display:block;width:100%;background:transparent;color:var(--green);border:1.5px solid var(--green);border-radius:9px;padding:10px;font-size:13px;font-weight:500;font-family:var(--font-body);cursor:pointer;text-align:center;margin-top:8px;transition:all .15s}
+.btn-secondary:hover{background:var(--green-light)}
+
+/* COLLECTORS */
+.filter-row{padding:10px 16px;display:flex;gap:8px;overflow-x:auto}
+.filter-row::-webkit-scrollbar{display:none}
+.filter-chip{padding:6px 12px;border-radius:20px;font-size:11.5px;font-weight:500;white-space:nowrap;cursor:pointer;border:1.5px solid var(--border);color:var(--ink-3);background:var(--bg-card);transition:all .15s;flex-shrink:0}
+.filter-chip.active{background:var(--green);color:white;border-color:var(--green)}
+.collectors-list{padding:0 16px}
+.collector-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow-sm);cursor:pointer;transition:all .15s;animation:slideIn .25s ease both}
+.collector-card:nth-child(1){animation-delay:.05s}.collector-card:nth-child(2){animation-delay:.1s}.collector-card:nth-child(3){animation-delay:.15s}.collector-card:nth-child(4){animation-delay:.2s}
+.collector-card:hover{border-color:var(--green-mid);box-shadow:var(--shadow)}
+.collector-top{display:flex;gap:12px;align-items:flex-start}
+.avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;flex-shrink:0;border:2px solid}
+.collector-info{flex:1;min-width:0}
+.collector-name{font-size:14px;font-weight:600;color:var(--ink)}
+.collector-type{font-size:11.5px;color:var(--ink-3);margin-top:1px}
+.collector-right{text-align:right;flex-shrink:0}
+.distance{font-size:12px;color:var(--ink-3)}
+.stars{font-size:11px;color:var(--amber);margin-top:2px}
+.rating-num{font-size:11px;color:var(--ink-3)}
+.badges{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.badge{font-size:10px;font-weight:500;padding:3px 8px;border-radius:12px;border:1px solid}
+.badge-green{background:#DCFCE7;color:#15803D;border-color:#86EFAC}
+.badge-blue{background:#DBEAFE;color:#1D4ED8;border-color:#93C5FD}
+.badge-amber{background:#FEF3C7;color:#B45309;border-color:#FCD34D}
+.badge-red{background:#FEE2E2;color:#B91C1C;border-color:#FCA5A5}
+.collector-bottom{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.action-btn{flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:500;font-family:var(--font-body);cursor:pointer;border:1.5px solid;transition:all .15s;text-align:center}
+.action-call{background:var(--green);color:white;border-color:var(--green)}
+.action-call:active{background:#155a30}
+.action-wa{background:white;color:#075E54;border-color:#25D366}
+.action-wa:hover{background:#DCFCE7}
+
+/* ENROLL HERO */
+.enroll-hero{margin:14px 16px 0;background:linear-gradient(140deg,#0f3d22 0%,#1B6B3A 55%,#2D8A52 100%);border-radius:var(--radius);padding:18px 16px 16px;position:relative;overflow:hidden;cursor:pointer;transition:transform .15s;box-shadow:var(--shadow)}
+.enroll-hero:active{transform:scale(.99)}
+.enroll-hero::before{content:'';position:absolute;right:-30px;top:-30px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.06)}
+.enroll-hero::after{content:'';position:absolute;right:20px;bottom:-40px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.04)}
+.enroll-hero-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:3px 10px;font-size:10px;font-weight:600;color:#A7F3C0;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px}
+.enroll-hero-badge-dot{width:5px;height:5px;background:#6EE7A0;border-radius:50%;animation:blink 2s infinite}
+.enroll-hero-title{font-family:var(--font-display);font-size:19px;color:white;line-height:1.25;margin-bottom:6px}
+.enroll-hero-sub{font-size:12px;color:rgba(255,255,255,.75);line-height:1.6;margin-bottom:14px}
+.enroll-hero-stats{display:flex;gap:0;background:rgba(0,0,0,.2);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.enroll-stat{flex:1;padding:8px 4px;text-align:center;border-right:1px solid rgba(255,255,255,.08)}
+.enroll-stat:last-child{border-right:none}
+.enroll-stat-val{font-size:16px;font-weight:700;color:white;font-family:var(--font-mono)}
+.enroll-stat-label{font-size:9.5px;color:rgba(255,255,255,.55);margin-top:2px}
+.enroll-hero-btn{width:100%;background:white;color:var(--green);border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;font-family:var(--font-body);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s}
+.enroll-hero-btn:active{background:#f0fdf4;transform:scale(.99)}
+.enroll-hero-perks{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.enroll-perk{font-size:10.5px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:4px}
+
+/* ENROLLMENT FORM */
+.enroll-form-wrap{margin:10px 16px 0;background:var(--bg-card);border:2px solid var(--green-mid);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);display:none}
+.enroll-form-wrap.open{display:block;animation:slideIn .25s ease}
+.enroll-progress{display:flex;background:var(--green-pale);border-bottom:1px solid var(--border);padding:10px 14px;gap:6px;align-items:center}
+.prog-step{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:var(--ink-4)}
+.prog-step.done{color:var(--green)}.prog-step.active{color:var(--green)}
+.prog-dot{width:20px;height:20px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--ink-4);flex-shrink:0;transition:all .2s}
+.prog-step.done .prog-dot{background:var(--green);color:white}
+.prog-step.active .prog-dot{background:var(--green);color:white;box-shadow:0 0 0 3px rgba(27,107,58,.2)}
+.prog-line{flex:1;height:1.5px;background:var(--border);min-width:8px}
+.prog-line.done{background:var(--green-mid)}
+.enroll-step-panel{display:none;padding:16px}
+.enroll-step-panel.active{display:block;animation:stepIn .2s ease}
+@keyframes stepIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+.estep-title{font-size:15px;font-weight:700;color:var(--ink);font-family:var(--font-display);margin-bottom:4px}
+.estep-sub{font-size:12px;color:var(--ink-3);margin-bottom:14px;line-height:1.5}
+.estep-field{margin-bottom:12px}
+.estep-label{font-size:11.5px;font-weight:600;color:var(--ink-2);margin-bottom:5px}
+.estep-input{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;color:var(--ink);font-family:var(--font-body);background:var(--bg);outline:none;transition:border-color .15s}
+.estep-input:focus{border-color:var(--green-mid);background:white}
+.otp-row{display:flex;gap:8px}
+.otp-input{width:44px;height:48px;border:1.5px solid var(--border);border-radius:9px;font-size:20px;font-weight:700;text-align:center;font-family:var(--font-mono);color:var(--ink);background:var(--bg);outline:none;transition:border-color .15s}
+.otp-input:focus{border-color:var(--green);background:white}
+.otp-hint{font-size:11px;color:var(--ink-4);margin-top:6px}
+.otp-resend{font-size:11px;color:var(--green);cursor:pointer;margin-top:4px}
+.waste-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ws-tile{border:1.5px solid var(--border);border-radius:9px;padding:10px;cursor:pointer;transition:all .15s;text-align:center;background:var(--bg)}
+.ws-tile:active,.ws-tile.sel{border-color:var(--green);background:var(--green-light)}
+.ws-tile-icon{font-size:20px;margin-bottom:4px}
+.ws-tile-label{font-size:11px;font-weight:600;color:var(--ink-2)}
+.ws-tile-note{font-size:9.5px;color:var(--ink-4);margin-top:2px}
+.ws-tile.sel .ws-tile-label{color:var(--green)}
+.license-card{background:var(--amber-light);border:1.5px solid #FCD34D;border-radius:9px;padding:10px 12px;font-size:11.5px;color:#92400E;line-height:1.6;margin-bottom:10px}
+.license-upload{border:2px dashed var(--border-mid);border-radius:9px;padding:16px;text-align:center;cursor:pointer;transition:all .15s;background:var(--bg);margin-bottom:8px}
+.license-upload:hover{border-color:var(--green-mid);background:var(--green-pale)}
+.license-upload-icon{font-size:24px;margin-bottom:4px}
+.license-upload-text{font-size:12px;color:var(--ink-3);font-weight:500}
+.license-upload-sub{font-size:10.5px;color:var(--ink-4);margin-top:2px}
+.license-skip{font-size:11px;color:var(--green);text-align:center;cursor:pointer;margin-top:4px}
+.selfie-area{background:#111;border-radius:12px;height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:10px;cursor:pointer;position:relative;overflow:hidden}
+.selfie-area::before{content:'';position:absolute;inset:0;border:2px solid rgba(255,255,255,.1);border-radius:12px}
+.selfie-circle{width:70px;height:70px;border-radius:50%;border:2px dashed rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:8px}
+.selfie-text{font-size:11px;color:rgba(255,255,255,.6)}
+.enroll-nav{display:flex;gap:8px;margin-top:4px}
+.enroll-back{padding:10px 16px;border:1.5px solid var(--border);border-radius:9px;background:none;font-size:13px;font-weight:500;color:var(--ink-3);font-family:var(--font-body);cursor:pointer;transition:all .15s}
+.enroll-next{flex:1;padding:11px;background:var(--green);color:white;border:none;border-radius:9px;font-size:13px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:all .15s}
+.enroll-next:active{background:#155a30;transform:scale(.99)}
+.enroll-next:disabled{background:var(--border-mid);color:var(--ink-4);cursor:not-allowed}
+.enroll-success{padding:24px 16px;text-align:center;display:none}
+.enroll-success.show{display:block;animation:fadeIn .3s ease}
+.enroll-success-icon{font-size:52px;margin-bottom:12px}
+.enroll-success-title{font-size:18px;font-weight:700;color:var(--ink);font-family:var(--font-display)}
+.enroll-success-sub{font-size:12px;color:var(--ink-3);margin-top:6px;line-height:1.6}
+.enroll-id-box{background:var(--green-light);border:1.5px solid var(--green-mid);border-radius:10px;padding:12px 16px;margin:14px 0}
+.enroll-id-label{font-size:10px;color:var(--green-mid);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.enroll-id-val{font-size:20px;font-weight:700;color:var(--green);font-family:var(--font-mono);margin-top:3px}
+.enroll-id-sub{font-size:11px;color:var(--ink-4);margin-top:3px}
+.enroll-cta{display:none}
+
+/* RATES */
+.rates-header{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between}
+.rates-updated{font-size:11px;color:var(--ink-4);display:flex;align-items:center;gap:4px;flex-shrink:0}
+.live-dot{width:6px;height:6px;background:#22C55E;border-radius:50%;animation:blink 2s infinite}
+.city-selector{margin:0 16px 12px;display:flex;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;overflow:hidden}
+.city-btn{flex:1;padding:8px;font-size:12px;font-weight:500;color:var(--ink-3);background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:all .15s}
+.city-btn.active{background:var(--green);color:white}
+.rate-section{padding:0 16px 4px}
+.rate-section-title{font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.8px;padding:8px 0 6px;border-bottom:1px solid var(--border);margin-bottom:2px}
+.rate-row{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.rate-row:last-child{border-bottom:none}
+.rate-icon{font-size:14px;margin-right:10px;width:20px;text-align:center;flex-shrink:0}
+.rate-name-col{flex:1;min-width:0}
+.rate-item{font-size:13px;color:var(--ink)}
+.rate-grade{font-size:10px;color:var(--ink-4);margin-top:1px}
+.rate-right{text-align:right;flex-shrink:0;padding-left:8px}
+.rate-price{font-size:13px;font-weight:600;color:var(--green);font-family:var(--font-mono)}
+.rate-trend{font-size:10px;margin-left:4px}
+.trend-up{color:#EF4444}.trend-dn{color:#22C55E}.trend-flat{color:var(--ink-4)}
+.rate-disclaimer{margin:8px 16px 0;padding:10px 12px;background:var(--amber-light);border-radius:8px;border-left:3px solid var(--amber)}
+.rate-disclaimer p{font-size:11px;color:#92400E;line-height:1.5}
+
+/* REPORT */
+.report-form{padding:14px 16px 0}
+.form-section{margin-bottom:16px}
+.form-label{font-size:12px;font-weight:600;color:var(--ink-2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.label-step{width:20px;height:20px;background:var(--green);color:white;border-radius:50%;font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.chips-wrap{display:flex;flex-wrap:wrap;gap:6px}
+.type-chip{padding:7px 12px;border-radius:20px;font-size:12px;font-weight:500;border:1.5px solid var(--border);color:var(--ink-2);background:var(--bg-card);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
+.type-chip.selected{background:var(--green);color:white;border-color:var(--green)}
+.type-chip.urgent{border-color:#FCA5A5;color:#991B1B;background:#FEF2F2}
+.type-chip.urgent.selected{background:#DC2626;border-color:#DC2626;color:white}
+.form-input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--ink);font-family:var(--font-body);background:var(--bg-card);outline:none;transition:border-color .15s}
+.form-input:focus{border-color:var(--green-mid)}
+.form-textarea{resize:none;height:72px;line-height:1.5}
+.location-input-wrap{position:relative}
+.location-input-wrap .form-input{padding-right:40px}
+.locate-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px}
+.photo-upload{border:2px dashed var(--border-mid);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .15s;background:var(--bg)}
+.photo-upload:hover{border-color:var(--green-mid);background:var(--green-pale)}
+.photo-upload-icon{font-size:28px;margin-bottom:6px}
+.photo-upload-text{font-size:12px;color:var(--ink-3)}
+.photo-upload-sub{font-size:11px;color:var(--ink-4);margin-top:3px}
+.severity-row{display:flex;gap:8px}
+.sev-btn{flex:1;padding:8px 4px;border-radius:8px;font-size:11.5px;font-weight:500;font-family:var(--font-body);cursor:pointer;border:1.5px solid;text-align:center;transition:all .15s}
+.sev-low{color:#15803D;border-color:#86EFAC;background:#F0FDF4}.sev-low.active{background:#15803D;color:white}
+.sev-med{color:#B45309;border-color:#FCD34D;background:#FFFBEB}.sev-med.active{background:#B45309;color:white}
+.sev-high{color:#991B1B;border-color:#FCA5A5;background:#FFF1F2}.sev-high.active{background:#DC2626;color:white}
+.submit-area{padding:0 16px 20px}
+
+/* SUCCESS */
+.success-overlay{position:absolute;inset:0;background:white;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;z-index:10}
+.success-overlay.show{display:flex;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.success-icon{font-size:64px;margin-bottom:16px}
+.success-title{font-size:20px;font-weight:700;color:var(--ink);font-family:var(--font-display)}
+.success-sub{font-size:13px;color:var(--ink-3);margin-top:8px;line-height:1.6}
+.ticket-box{margin:20px 0;background:var(--green-light);border:1.5px solid var(--green-mid);border-radius:12px;padding:14px 20px}
+.ticket-label{font-size:11px;color:var(--green-mid);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.ticket-num{font-size:22px;font-weight:700;color:var(--green);font-family:var(--font-mono);margin-top:4px}
+.ticket-sla{font-size:11px;color:var(--ink-3);margin-top:4px}
+
+/* MODALS */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;z-index:20}
+.modal-overlay.show{display:flex}
+.modal-sheet{width:100%;background:var(--bg-card);border-radius:24px 24px 0 0;padding:20px;max-height:85%;overflow-y:auto;animation:slideUp .3s cubic-bezier(.32,.72,0,1)}
+.modal-sheet::-webkit-scrollbar{display:none}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--border-mid);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:17px;font-weight:700;color:var(--ink);font-family:var(--font-display);margin-bottom:4px}
+.detail-header{text-align:center;padding:4px 0 16px}
+.detail-avatar{width:72px;height:72px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:600;border:3px solid}
+.detail-name{font-size:18px;font-weight:700;color:var(--ink);font-family:var(--font-display)}
+.detail-type{font-size:12.5px;color:var(--ink-3);margin-top:3px}
+.detail-stats{display:flex;gap:0;margin:14px 0;border:1.5px solid var(--border);border-radius:12px;overflow:hidden}
+.detail-stat{flex:1;padding:10px;text-align:center;border-right:1px solid var(--border)}
+.detail-stat:last-child{border-right:none}
+.stat-val{font-size:17px;font-weight:700;color:var(--ink);font-family:var(--font-mono)}
+.stat-label{font-size:10px;color:var(--ink-4);margin-top:2px}
+.detail-rates{background:var(--green-pale);border-radius:10px;padding:12px;margin-bottom:14px}
+.dr-title{font-size:11px;font-weight:600;color:var(--green-mid);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.dr-row{display:flex;justify-content:space-between;padding:4px 0;font-size:12.5px}
+.dr-item{color:var(--ink-2)}.dr-price{color:var(--green);font-weight:600;font-family:var(--font-mono)}
+
+/* DIVIDER */
+.section-divider{padding:14px 16px 6px;display:flex;align-items:center;gap:10px}
+.section-divider-line{flex:1;height:1px;background:var(--border)}
+.section-divider-text{font-size:11px;color:var(--ink-4);white-space:nowrap}
+
+/* TOAST */
+.toast{position:absolute;top:110px;left:16px;right:16px;background:#1F2937;color:white;border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.4;z-index:100;box-shadow:var(--shadow-lg);display:none;animation:toastIn .3s cubic-bezier(.32,.72,0,1)}
+.toast.show{display:block}
+@keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.toast-title{font-weight:600}
+.toast-body{color:rgba(255,255,255,.7);margin-top:2px}
+
+/* WATERMARK */
+.proto-tag{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:9px;color:rgba(255,255,255,.2);letter-spacing:2px;text-transform:uppercase;font-family:var(--font-mono);pointer-events:none;white-space:nowrap}
+
+/* Hindi font boost */
+.hi .waste-tile-label,.hi .estep-title,.hi .enroll-hero-title,.hi .emergency-title,
+.hi .section-title,.hi .collector-name,.hi .rate-item,.hi .form-label,
+.hi .info-panel-title,.hi .filter-chip,.hi .badge,.hi .type-chip,.hi .sev-btn,
+.hi .nav-btn,.hi .btn-primary,.hi .btn-secondary,.hi .enroll-hero-btn,
+.hi .enroll-next,.hi .enroll-back,.hi .enroll-stat-label,.hi .estep-sub,
+.hi .estep-label,.hi .info-desc,.hi .info-step-text,.hi .collector-type,
+.hi .success-title,.hi .success-sub,.hi .ticket-sla,.hi .license-card,
+.hi .rate-disclaimer p,.hi .modal-title,.hi .detail-name{
+  font-family:var(--font-display);
+}
+.hi .estep-title,.hi .enroll-hero-title,.hi .emergency-title,.hi .success-title{
+  font-size:16px;
+}
+/* ══════════════════════════════════════════════
+   PHASE 2 — SHARED
+══════════════════════════════════════════════ */
+.p2-header{background:linear-gradient(135deg,#4C1D95,#6D28D9);padding:14px 16px 16px;margin:0 0 0;flex-shrink:0}
+.p2-header-title{font-family:var(--font-display);font-size:17px;color:white;font-weight:700}
+.p2-header-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:3px}
+.p2-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:2px 8px;font-size:9.5px;font-weight:700;color:#DDD6FE;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.stat-card-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px 0}
+.stat-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;box-shadow:var(--shadow-sm)}
+.stat-card-val{font-size:22px;font-weight:700;color:var(--ink);font-family:var(--font-mono);line-height:1}
+.stat-card-lbl{font-size:10.5px;color:var(--ink-3);margin-top:4px}
+.stat-card-trend{font-size:10px;margin-top:3px;font-weight:500}
+.stat-card-trend.up{color:#16A34A}.stat-card-trend.dn{color:#DC2626}.stat-card-trend.neu{color:var(--ink-4)}
+.p2-section{padding:14px 16px 0}
+.p2-section-title{font-size:12px;font-weight:700;color:var(--ink-2);letter-spacing:.3px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.p2-section-action{font-size:11px;color:var(--green);cursor:pointer;font-weight:500}
+
+/* ══ ULB DASHBOARD ══ */
+.ward-selector{margin:10px 16px 0;display:flex;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;overflow:hidden}
+.ward-btn{flex:1;padding:7px 4px;font-size:11px;font-weight:500;color:var(--ink-3);background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:all .15s;text-align:center}
+.ward-btn.active{background:#6D28D9;color:white}
+.ticket-list{padding:0 16px}
+.ticket-item{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;cursor:pointer;transition:all .15s}
+.ticket-item:active{background:var(--bg)}
+.ticket-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.ticket-dot.open{background:#F59E0B}.ticket-dot.inprogress{background:#3B82F6}.ticket-dot.resolved{background:#22C55E}.ticket-dot.urgent{background:#EF4444;animation:pring 1.5s infinite}
+.ticket-body{flex:1;min-width:0}
+.ticket-title{font-size:12.5px;font-weight:600;color:var(--ink)}
+.ticket-meta{font-size:11px;color:var(--ink-3);margin-top:2px}
+.ticket-right{text-align:right;flex-shrink:0}
+.ticket-time{font-size:10px;color:var(--ink-4)}
+.ticket-status{font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:8px;margin-top:3px;display:inline-block}
+.status-open{background:#FEF3C7;color:#B45309}.status-inprogress{background:#DBEAFE;color:#1D4ED8}.status-resolved{background:#DCFCE7;color:#15803D}.status-urgent{background:#FEE2E2;color:#B91C1C}
+.ulb-chart-wrap{margin:12px 16px 0;background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;box-shadow:var(--shadow-sm)}
+.ulb-chart-title{font-size:11px;font-weight:600;color:var(--ink-2);margin-bottom:10px}
+.bar-chart{display:flex;align-items:flex-end;gap:5px;height:70px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar-fill{width:100%;border-radius:3px 3px 0 0;transition:height .4s ease;min-height:3px}
+.bar-lbl{font-size:8.5px;color:var(--ink-4);text-align:center}
+.bar-val{font-size:8px;color:var(--ink-3);font-weight:600}
+.sla-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.sla-row:last-child{border-bottom:none}
+.sla-label{font-size:12px;color:var(--ink-2);flex:1}
+.sla-bar-wrap{width:80px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.sla-bar-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.sla-pct{font-size:11px;font-weight:600;color:var(--ink-2);min-width:32px;text-align:right}
+
+/* ══ BIOMEDICAL B2B ══ */
+.bio-manifest{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;box-shadow:var(--shadow-sm)}
+.bio-manifest-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.bio-manifest-id{font-size:12px;font-weight:700;color:var(--ink);font-family:var(--font-mono)}
+.bio-manifest-status{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px}
+.bio-mstatus-pending{background:#FEF3C7;color:#B45309}
+.bio-mstatus-collected{background:#DBEAFE;color:#1D4ED8}
+.bio-mstatus-disposed{background:#DCFCE7;color:#15803D}
+.bio-manifest-row{display:flex;justify-content:space-between;font-size:11.5px;padding:3px 0}
+.bio-mrow-lbl{color:var(--ink-3)}.bio-mrow-val{color:var(--ink-2);font-weight:500}
+.bio-track-steps{display:flex;gap:0;margin:10px 0 0}
+.bio-track-step{flex:1;text-align:center;position:relative}
+.bio-track-step::before{content:'';position:absolute;top:9px;left:50%;right:-50%;height:2px;background:var(--border);z-index:0}
+.bio-track-step:last-child::before{display:none}
+.bio-track-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:9px;margin:0 auto 4px;position:relative;z-index:1;transition:all .3s}
+.bio-track-dot.done{background:var(--green);border-color:var(--green);color:white}
+.bio-track-dot.active{background:#3B82F6;border-color:#3B82F6;color:white;box-shadow:0 0 0 3px rgba(59,130,246,.25)}
+.bio-track-lbl{font-size:8.5px;color:var(--ink-4);line-height:1.2}
+.bio-new-btn{margin:0 16px 10px;width:calc(100% - 32px);background:linear-gradient(135deg,#7C3AED,#6D28D9);color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;font-family:var(--font-body);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.bio-new-btn:active{opacity:.9;transform:scale(.99)}
+.bio-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.bio-type-chip{border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2);font-weight:500;background:var(--bg)}
+.bio-type-chip.sel{border-color:#7C3AED;background:#F5F3FF;color:#6D28D9}
+
+/* ══ ANALYTICS ══ */
+.analytics-tabs{display:flex;background:var(--bg-card);border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin:10px 16px 0}
+.atab{flex:1;padding:8px 4px;font-size:11px;font-weight:500;color:var(--ink-3);background:none;border:none;cursor:pointer;font-family:var(--font-body);transition:all .15s;text-align:center}
+.atab.active{background:#6D28D9;color:white}
+.analytics-chart{margin:10px 16px 0;background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;box-shadow:var(--shadow-sm)}
+.ac-title{font-size:11px;font-weight:600;color:var(--ink-2);margin-bottom:2px}
+.ac-sub{font-size:10px;color:var(--ink-4);margin-bottom:12px}
+.donut-wrap{display:flex;align-items:center;gap:16px}
+.donut-svg{flex-shrink:0}
+.donut-legend{flex:1}
+.legend-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.legend-lbl{font-size:11px;color:var(--ink-2);flex:1}
+.legend-pct{font-size:11px;font-weight:600;color:var(--ink);font-family:var(--font-mono)}
+.line-chart-svg{width:100%;overflow:visible}
+.heatmap-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px}
+.hm-cell{aspect-ratio:1;border-radius:2px;cursor:pointer;transition:opacity .15s}
+.hm-cell:hover{opacity:.7}
+.hm-day-lbl{font-size:8px;color:var(--ink-4);text-align:center;margin-bottom:3px}
+.analytics-insight{margin:10px 16px 0;background:linear-gradient(135deg,#EDE9FE,#F5F3FF);border:1.5px solid #C4B5FD;border-radius:var(--radius-sm);padding:12px}
+.ai-icon{font-size:18px;margin-bottom:4px}
+.ai-title{font-size:12px;font-weight:700;color:#6D28D9;margin-bottom:3px}
+.ai-text{font-size:11.5px;color:#4C1D95;line-height:1.6}
+
+/* ══ COLLECTOR WELFARE ══ */
+.welfare-hero{margin:12px 16px 0;background:linear-gradient(135deg,#065F46,#047857);border-radius:var(--radius-sm);padding:14px;display:flex;gap:12px;align-items:center}
+.welfare-hero-icon{font-size:36px;flex-shrink:0}
+.welfare-hero-text{}
+.welfare-hero-title{font-size:14px;font-weight:700;color:white;font-family:var(--font-display)}
+.welfare-hero-sub{font-size:11px;color:rgba(255,255,255,.75);margin-top:3px;line-height:1.5}
+.welfare-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:all .15s;box-shadow:var(--shadow-sm)}
+.welfare-card:active{background:var(--bg)}
+.welfare-card-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.welfare-card-body{flex:1}
+.welfare-card-title{font-size:13px;font-weight:600;color:var(--ink)}
+.welfare-card-sub{font-size:11px;color:var(--ink-3);margin-top:2px;line-height:1.5}
+.welfare-card-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.welfare-tag{font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:8px}
+.wtag-free{background:#DCFCE7;color:#15803D}
+.wtag-gov{background:#DBEAFE;color:#1D4ED8}
+.wtag-new{background:#FEE2E2;color:#B91C1C}
+.welfare-arrow{font-size:14px;color:var(--ink-4)}
+.income-cert-box{margin:0 16px 10px;background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:1.5px solid #6EE7B7;border-radius:var(--radius-sm);padding:12px 14px}
+.icb-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.icb-icon{font-size:22px}
+.icb-title{font-size:13px;font-weight:700;color:#065F46;font-family:var(--font-display)}
+.icb-meta{font-size:11px;color:#047857;margin-top:2px}
+.icb-stats{display:flex;gap:0;background:rgba(255,255,255,.6);border-radius:8px;overflow:hidden}
+.icb-stat{flex:1;padding:8px;text-align:center;border-right:1px solid rgba(0,0,0,.06)}
+.icb-stat:last-child{border-right:none}
+.icb-val{font-size:15px;font-weight:700;color:#065F46;font-family:var(--font-mono)}
+.icb-lbl{font-size:9.5px;color:#059669;margin-top:1px}
+.training-card{margin:0 16px 8px;background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px;display:flex;gap:10px;align-items:center}
+.training-thumb{width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px}
+.training-info{flex:1}
+.training-title{font-size:12.5px;font-weight:600;color:var(--ink)}
+.training-meta{font-size:11px;color:var(--ink-3);margin-top:2px}
+.training-prog{margin-top:6px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.training-prog-fill{height:100%;background:var(--green);border-radius:2px}
+.training-enroll-btn{font-size:11px;font-weight:600;color:var(--green);background:var(--green-light);border:none;border-radius:6px;padding:5px 10px;cursor:pointer;flex-shrink:0}
+
+/* ══════════════════════════════════════════════
+   LOGIN MODAL
+══════════════════════════════════════════════ */
+.login-overlay{position:absolute;inset:0;background:rgba(10,20,12,.6);display:none;align-items:flex-end;z-index:50;backdrop-filter:blur(2px)}
+.login-overlay.show{display:flex}
+.login-sheet{width:100%;background:var(--bg-card);border-radius:24px 24px 0 0;padding:24px 20px 32px;animation:slideUp .3s cubic-bezier(.32,.72,0,1)}
+.login-handle{width:36px;height:4px;background:var(--border-mid);border-radius:2px;margin:0 auto 20px}
+.login-icon{font-size:40px;text-align:center;margin-bottom:12px}
+.login-title{font-size:19px;font-weight:700;color:var(--ink);font-family:var(--font-display);text-align:center;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--ink-3);text-align:center;line-height:1.6;margin-bottom:20px}
+.login-field{margin-bottom:12px}
+.login-label{font-size:11.5px;font-weight:600;color:var(--ink-2);margin-bottom:5px}
+.login-input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;color:var(--ink);font-family:var(--font-body);background:var(--bg);outline:none;transition:border-color .15s}
+.login-input:focus{border-color:var(--green-mid);background:white}
+.login-otp-row{display:flex;gap:8px;margin-bottom:6px}
+.login-otp-input{flex:1;height:50px;border:1.5px solid var(--border);border-radius:10px;font-size:22px;font-weight:700;text-align:center;font-family:var(--font-mono);color:var(--ink);background:var(--bg);outline:none;transition:border-color .15s}
+.login-otp-input:focus{border-color:var(--green);background:white}
+.login-otp-hint{font-size:11px;color:var(--ink-4);margin-bottom:12px}
+.login-otp-resend{font-size:11px;color:var(--green);cursor:pointer;margin-bottom:14px}
+.login-btn{width:100%;background:var(--green);color:white;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;font-family:var(--font-body);cursor:pointer;transition:all .15s}
+.login-btn:active{background:#155a30;transform:scale(.99)}
+.login-btn:disabled{background:var(--border-mid);color:var(--ink-4);cursor:not-allowed}
+.login-skip{font-size:11px;color:var(--ink-4);text-align:center;margin-top:12px;cursor:pointer}
+.login-skip span{color:var(--green);font-weight:500}
+.login-user-bar{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border-radius:10px;padding:5px 10px 5px 6px;cursor:pointer;transition:background .15s}
+.login-user-bar:hover{background:rgba(255,255,255,.2)}
+.login-avatar-sm{width:26px;height:26px;border-radius:50%;background:#6EE7A0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green);flex-shrink:0}
+.login-user-name{font-size:11px;font-weight:600;color:white;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Step states inside login */
+.login-step{display:none}.login-step.active{display:block}
+
+/* ══════════════════════════════════════════════
+   MY REQUESTS SCREEN
+══════════════════════════════════════════════ */
+.myrequests-header{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between}
+.myrequests-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 4px}
+.mrsumm-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 8px;text-align:center;box-shadow:var(--shadow-sm)}
+.mrsumm-val{font-size:20px;font-weight:700;color:var(--ink);font-family:var(--font-mono)}
+.mrsumm-lbl{font-size:9.5px;color:var(--ink-3);margin-top:3px;line-height:1.3}
+.mrsumm-val.green{color:var(--green)}.mrsumm-val.amber{color:var(--amber)}.mrsumm-val.red{color:var(--red)}
+.mr-filter-row{padding:10px 16px 4px;display:flex;gap:7px;overflow-x:auto}
+.mr-filter-row::-webkit-scrollbar{display:none}
+.mr-chip{padding:5px 12px;border-radius:20px;font-size:11.5px;font-weight:500;border:1.5px solid var(--border);color:var(--ink-3);background:var(--bg-card);cursor:pointer;transition:all .15s;flex-shrink:0;white-space:nowrap}
+.mr-chip.active{background:var(--green);color:white;border-color:var(--green)}
+.requests-list{padding:0 16px}
+.request-card{background:var(--bg-card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:13px;margin-bottom:9px;box-shadow:var(--shadow-sm);cursor:pointer;transition:all .15s}
+.request-card:active{background:var(--bg)}
+.request-card-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.request-type{font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:6px}
+.request-id{font-size:10px;color:var(--ink-4);font-family:var(--font-mono);margin-top:2px}
+.request-status-badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+.rsb-open{background:#FEF3C7;color:#B45309}
+.rsb-progress{background:#DBEAFE;color:#1D4ED8}
+.rsb-resolved{background:#DCFCE7;color:#15803D}
+.rsb-urgent{background:#FEE2E2;color:#B91C1C}
+.request-meta-row{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--ink-3)}
+.request-location{display:flex;align-items:center;gap:4px;flex:1;overflow:hidden}
+.request-loc-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.request-time{flex-shrink:0;font-size:10.5px;color:var(--ink-4)}
+.request-progress-bar{margin-top:10px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.request-progress-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.request-sla{margin-top:6px;font-size:10.5px;color:var(--ink-3);display:flex;align-items:center;gap:4px}
+.request-actions{display:flex;gap:7px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.req-action-btn{flex:1;padding:7px 6px;border-radius:7px;font-size:11px;font-weight:500;font-family:var(--font-body);cursor:pointer;border:1.5px solid;text-align:center;transition:all .15s}
+.req-btn-track{background:var(--bg);color:var(--green);border-color:var(--green)}
+.req-btn-escalate{background:var(--bg);color:var(--amber);border-color:var(--amber)}
+.req-btn-close{background:var(--bg);color:var(--ink-3);border-color:var(--border)}
+.mr-empty{text-align:center;padding:40px 24px}
+.mr-empty-icon{font-size:48px;margin-bottom:12px}
+.mr-empty-title{font-size:15px;font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.mr-empty-sub{font-size:12px;color:var(--ink-4);line-height:1.6}
+.mr-login-prompt{margin:16px 16px 0;background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1.5px solid #86EFAC;border-radius:var(--radius-sm);padding:16px;text-align:center}
+.mr-login-prompt-icon{font-size:32px;margin-bottom:8px}
+.mr-login-prompt-title{font-size:14px;font-weight:700;color:var(--green);margin-bottom:4px}
+.mr-login-prompt-sub{font-size:12px;color:#16A34A;line-height:1.5;margin-bottom:12px}
+
+</style>
+</head>
+<body>
+<div class="phone-shell" id="phone">
+
+  <div class="status-bar">
+    <div class="status-time">10:42</div>
+    <div class="status-icons"><span>▲▲▲</span><span>WiFi</span><span>🔋97</span></div>
+  </div>
+
+  <div class="app-header">
+    <div class="header-row">
+      <div class="app-logo">
+        <div class="logo-en">SwachhConnect</div>
+        <div class="logo-sub" id="hdr-sub">स्वच्छ कनेक्ट · Waste Made Simple</div>
+      </div>
+      <div class="header-right">
+        <div id="login-user-bar" class="login-user-bar" style="display:none" onclick="showLoginModal()">
+          <div class="login-avatar-sm" id="hdr-avatar">RK</div>
+          <div class="login-user-name" id="hdr-username">Rahul</div>
+        </div>
+        <div id="login-btn-wrap">
+          <button class="lang-btn" style="background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer" onclick="showLoginModal()" id="hdr-login-btn">Login</button>
+        </div>
+        <div class="lang-toggle">
+          <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+          <button class="lang-btn" id="btn-hi" onclick="setLang('hi')">हि</button>
+        </div>
+        <div class="header-beta" id="hdr-beta">Beta</div>
+      </div>
+    </div>
+    <div class="location-row">
+      <div class="loc-dot"></div>
+      <div class="location-text" id="hdr-loc">M3M Urbana, Sector 67, Gurgaon 122101</div>
+      <div class="location-change" id="hdr-change" onclick="showToast(T('gps_title'),T('gps_body'))">Change</div>
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <div class="nav-row" id="nav-row">
+      <button class="nav-btn active" id="nav-home" onclick="showScreen('home')">
+        <span class="nav-icon">♻️</span><span id="nav-lbl-home">Dispose</span>
+      </button>
+      <button class="nav-btn" id="nav-collectors" onclick="showScreen('collectors')">
+        <span class="nav-icon">👤</span><span id="nav-lbl-collectors">Collectors</span>
+      </button>
+      <button class="nav-btn" id="nav-rates" onclick="showScreen('rates')">
+        <span class="nav-icon">₹</span><span id="nav-lbl-rates">Rates</span>
+      </button>
+      <button class="nav-btn" id="nav-report" onclick="showScreen('report')">
+        <span class="nav-icon">🚨</span><span id="nav-lbl-report">Report</span>
+      </button>
+      <button class="nav-btn" id="nav-myrequests" onclick="showScreen('myrequests')">
+        <span class="nav-icon">📋</span><span id="nav-lbl-myrequests">My Requests</span>
+      </button>
+      <div style="width:1px;background:var(--border);margin:6px 0;flex-shrink:0"></div>
+      <button class="nav-btn p2-tab" id="nav-ulb" onclick="showScreen('ulb')">
+        <span class="nav-icon">🏛️</span><span id="nav-lbl-ulb">ULB</span>
+      </button>
+      <button class="nav-btn p2-tab" id="nav-biomedical" onclick="showScreen('biomedical')">
+        <span class="nav-icon">🧬</span><span id="nav-lbl-biomedical">BioMed</span>
+      </button>
+      <button class="nav-btn p2-tab" id="nav-analytics" onclick="showScreen('analytics')">
+        <span class="nav-icon">📊</span><span id="nav-lbl-analytics">Analytics</span>
+      </button>
+      <button class="nav-btn p2-tab" id="nav-welfare" onclick="showScreen('welfare')">
+        <span class="nav-icon">🤝</span><span id="nav-lbl-welfare">Welfare</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="screen-container">
+    <div class="toast" id="toast">
+      <div class="toast-title" id="toast-title"></div>
+      <div class="toast-body" id="toast-body"></div>
+    </div>
+
+    <!-- HOME -->
+    <div class="screen active" id="screen-home">
+      <div class="screen-inner">
+        <div class="emergency-card" onclick="showScreen('report');setUrgent()">
+          <div class="emergency-pulse">🚨</div>
+          <div class="emergency-text">
+            <div class="emergency-title" id="emg-title">Emergency Hazard Report</div>
+            <div class="emergency-sub" id="emg-sub">Dead animal · Open hospital waste · Chemical spill</div>
+          </div>
+          <div class="emergency-arrow">›</div>
+        </div>
+        <div class="section-header">
+          <span class="section-title" id="home-sec-title">What do you want to dispose?</span>
+          <span class="section-sub" id="home-sec-sub">Tap to learn</span>
+        </div>
+        <div class="waste-grid" id="waste-grid"><!-- rendered by JS --></div>
+        <div class="info-panel" id="info-panel">
+          <div class="info-panel-header">
+            <div class="info-panel-title" id="info-title"></div>
+            <button class="info-panel-close" onclick="closeInfo()">✕</button>
+          </div>
+          <div class="info-panel-body">
+            <div class="info-desc" id="info-desc"></div>
+            <div class="info-steps" id="info-steps"></div>
+            <div class="info-action" id="info-action"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLLECTORS -->
+    <div class="screen" id="screen-collectors">
+      <div class="screen-inner">
+        <div class="enroll-hero" id="enroll-hero" onclick="openEnrollForm()">
+          <div class="enroll-hero-badge">
+            <span class="enroll-hero-badge-dot"></span><span id="eh-badge">Now enrolling</span>
+          </div>
+          <div class="enroll-hero-title" id="eh-title">Are you a Kabadiwala<br>or Waste Collector?</div>
+          <div class="enroll-hero-sub" id="eh-sub">Join SwachhConnect free. Get listed on the map, receive pickup requests directly, and access live scrap rate data.</div>
+          <div class="enroll-hero-stats">
+            <div class="enroll-stat">
+              <div class="enroll-stat-val">₹0</div>
+              <div class="enroll-stat-label" id="eh-s1">Enrollment fee</div>
+            </div>
+            <div class="enroll-stat">
+              <div class="enroll-stat-val">9 min</div>
+              <div class="enroll-stat-label" id="eh-s2">To complete</div>
+            </div>
+            <div class="enroll-stat">
+              <div class="enroll-stat-val">247</div>
+              <div class="enroll-stat-label" id="eh-s3">Enrolled nearby</div>
+            </div>
+          </div>
+          <button class="enroll-hero-btn" onclick="event.stopPropagation();openEnrollForm()">
+            <span>✦</span> <span id="eh-cta">Start Free Enrollment</span>
+          </button>
+          <div class="enroll-hero-perks">
+            <span class="enroll-perk" id="eh-p1">✓ Works on any phone</span>
+            <span class="enroll-perk" id="eh-p2">✓ Aadhaar KYC</span>
+            <span class="enroll-perk" id="eh-p3">✓ Instant approval for kabadis</span>
+          </div>
+        </div>
+
+        <!-- INLINE ENROLLMENT FORM -->
+        <div class="enroll-form-wrap" id="enroll-form-wrap">
+          <div class="enroll-progress" id="enroll-progress">
+            <div class="prog-step active" id="prog-1"><div class="prog-dot">1</div><span id="prog-lbl-1">Phone</span></div>
+            <div class="prog-line" id="pline-1"></div>
+            <div class="prog-step" id="prog-2"><div class="prog-dot">2</div><span id="prog-lbl-2">OTP</span></div>
+            <div class="prog-line" id="pline-2"></div>
+            <div class="prog-step" id="prog-3"><div class="prog-dot">3</div><span id="prog-lbl-3">KYC</span></div>
+            <div class="prog-line" id="pline-3"></div>
+            <div class="prog-step" id="prog-4"><div class="prog-dot">4</div><span id="prog-lbl-4">Services</span></div>
+            <div class="prog-line" id="pline-4"></div>
+            <div class="prog-step" id="prog-5"><div class="prog-dot">5</div><span id="prog-lbl-5">Docs</span></div>
+          </div>
+
+          <!-- Step 1 -->
+          <div class="enroll-step-panel active" id="estep-1">
+            <div class="estep-title" id="es1-title">Enter your mobile number</div>
+            <div class="estep-sub" id="es1-sub">We'll send a one-time password. No internet required for OTP — works on any 2G/3G phone.</div>
+            <div class="estep-field">
+              <div class="estep-label" id="es1-lbl-ph">Mobile Number</div>
+              <div style="display:flex;gap:8px">
+                <div style="padding:10px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;color:var(--ink-3);background:var(--bg);white-space:nowrap">🇮🇳 +91</div>
+                <input class="estep-input" type="tel" id="e-phone" placeholder="98765 43210" maxlength="10" style="flex:1" oninput="checkPhoneStep()"/>
+              </div>
+            </div>
+            <div class="estep-field">
+              <div class="estep-label" id="es1-lbl-name">Your Name</div>
+              <input class="estep-input" type="text" id="e-name" oninput="checkPhoneStep()"/>
+            </div>
+            <div class="estep-field">
+              <div class="estep-label" id="es1-lbl-lang">Preferred Language</div>
+              <select class="estep-input" id="e-lang" style="cursor:pointer" onchange="onLangSelectChange()">
+                <option value="hi">हिंदी (Hindi)</option>
+                <option value="en">English</option>
+                <option value="mr">Marathi · मराठी</option>
+                <option value="ta">Tamil · தமிழ்</option>
+                <option value="te">Telugu · తెలుగు</option>
+                <option value="bn">Bengali · বাংলা</option>
+              </select>
+            </div>
+            <div class="enroll-nav">
+              <button class="enroll-back" id="es1-cancel" onclick="closeEnrollForm()">✕ Cancel</button>
+              <button class="enroll-next" id="btn-step1" disabled onclick="goStep(2)"><span id="es1-next">Send OTP</span> →</button>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="enroll-step-panel" id="estep-2">
+            <div class="estep-title" id="es2-title">Enter OTP</div>
+            <div class="estep-sub" id="otp-desc">A 6-digit code has been sent to your number.</div>
+            <div class="otp-row" style="margin-bottom:4px">
+              <input class="otp-input" type="tel" maxlength="1" oninput="otpNext(this,0)" id="otp0"/>
+              <input class="otp-input" type="tel" maxlength="1" oninput="otpNext(this,1)" id="otp1"/>
+              <input class="otp-input" type="tel" maxlength="1" oninput="otpNext(this,2)" id="otp2"/>
+              <input class="otp-input" type="tel" maxlength="1" oninput="otpNext(this,3)" id="otp3"/>
+              <input class="otp-input" type="tel" maxlength="1" oninput="otpNext(this,4)" id="otp4"/>
+              <input class="otp-input" type="tel" maxlength="1" oninput="otpNext(this,5)" id="otp5"/>
+            </div>
+            <div class="otp-hint" id="es2-hint">Demo OTP: <strong>1 2 3 4 5 6</strong></div>
+            <div class="otp-resend" id="es2-resend" onclick="showToast(T('otp_resent_t'),T('otp_resent_b'))">Resend OTP</div>
+            <div class="enroll-nav" style="margin-top:14px">
+              <button class="enroll-back" id="es2-back" onclick="goStep(1)">← Back</button>
+              <button class="enroll-next" id="btn-step2" disabled onclick="goStep(3)"><span id="es2-verify">Verify</span> →</button>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="enroll-step-panel" id="estep-3">
+            <div class="estep-title" id="es3-title">Aadhaar e-KYC</div>
+            <div class="estep-sub" id="es3-sub">Verify your identity via Aadhaar OTP. Your data is encrypted and UIDAI-compliant.</div>
+            <div class="estep-field">
+              <div class="estep-label" id="es3-lbl-a">Aadhaar Number</div>
+              <input class="estep-input" type="tel" id="e-aadhaar" placeholder="XXXX XXXX XXXX" maxlength="14" oninput="fmtAadhaar(this);checkKycStep()"/>
+            </div>
+            <div class="estep-field">
+              <div class="estep-label" id="es3-lbl-s">Live Selfie</div>
+              <div class="selfie-area" onclick="showToast(T('cam_t'),T('cam_b'))">
+                <div class="selfie-circle">🤳</div>
+                <div class="selfie-text" id="es3-selfie-txt">Tap to open front camera</div>
+              </div>
+              <div style="font-size:10.5px;color:var(--ink-4)" id="es3-selfie-hint">Face must match your Aadhaar photo · Liveness check enabled</div>
+            </div>
+            <div class="enroll-nav">
+              <button class="enroll-back" id="es3-back" onclick="goStep(2)">← Back</button>
+              <button class="enroll-next" id="btn-step3" disabled onclick="goStep(4)"><span id="es3-next">Confirm KYC</span> →</button>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="enroll-step-panel" id="estep-4">
+            <div class="estep-title" id="es4-title">What do you collect?</div>
+            <div class="estep-sub" id="es4-sub">Select all that apply.</div>
+            <div class="waste-select-grid" id="ws-grid">
+              <div class="ws-tile" onclick="toggleWaste(this,'kabadi')">
+                <div class="ws-tile-icon">📦</div>
+                <div class="ws-tile-label" id="wst-kabadi">Dry Scrap</div>
+                <div class="ws-tile-note" id="wsn-kabadi">Paper, metal, plastic</div>
+              </div>
+              <div class="ws-tile" onclick="toggleWaste(this,'ewaste')">
+                <div class="ws-tile-icon">💻</div>
+                <div class="ws-tile-label" id="wst-ewaste">E-Waste</div>
+                <div class="ws-tile-note" id="wsn-ewaste">Needs certification</div>
+              </div>
+              <div class="ws-tile" onclick="toggleWaste(this,'bio')">
+                <div class="ws-tile-icon">🧪</div>
+                <div class="ws-tile-label" id="wst-bio">Biomedical</div>
+                <div class="ws-tile-note" id="wsn-bio">CPCB license needed</div>
+              </div>
+              <div class="ws-tile" onclick="toggleWaste(this,'cd')">
+                <div class="ws-tile-icon">🧱</div>
+                <div class="ws-tile-label" id="wst-cd">C&amp;D Debris</div>
+                <div class="ws-tile-note" id="wsn-cd">Vehicle required</div>
+              </div>
+              <div class="ws-tile" onclick="toggleWaste(this,'garden')">
+                <div class="ws-tile-icon">🌿</div>
+                <div class="ws-tile-label" id="wst-garden">Wet / Organic</div>
+                <div class="ws-tile-note" id="wsn-garden">Garden &amp; kitchen</div>
+              </div>
+              <div class="ws-tile" onclick="toggleWaste(this,'religious')">
+                <div class="ws-tile-icon">🪔</div>
+                <div class="ws-tile-label" id="wst-religious">Religious</div>
+                <div class="ws-tile-note" id="wsn-religious">Flowers, nirmalya</div>
+              </div>
+            </div>
+            <div class="estep-field" style="margin-top:12px">
+              <div class="estep-label" id="es4-lbl-area">Service Area</div>
+              <input class="estep-input" type="text" id="e-area" oninput="checkServicesStep()"/>
+            </div>
+            <div class="enroll-nav">
+              <button class="enroll-back" id="es4-back" onclick="goStep(3)">← Back</button>
+              <button class="enroll-next" id="btn-step4" disabled onclick="goStep(5)"><span id="es4-next">Next</span> →</button>
+            </div>
+          </div>
+
+          <!-- Step 5 -->
+          <div class="enroll-step-panel" id="estep-5">
+            <div class="estep-title" id="es5-title">License Documents</div>
+            <div class="estep-sub" id="es5-sub">Upload relevant licenses. Kabadis are exempt.</div>
+            <div class="license-card" id="es5-info">Required for: E-Waste (PRO cert), Biomedical (CPCB BMW auth), C&amp;D Hauler (RC + permit). Kabadis: no license needed.</div>
+            <div class="license-upload" onclick="showToast(T('upload_t'),T('upload_b'))">
+              <div class="license-upload-icon">📎</div>
+              <div class="license-upload-text" id="es5-upload-txt">Tap to upload license / certificate</div>
+              <div class="license-upload-sub" id="es5-upload-sub">JPG, PNG or PDF · Max 5 MB</div>
+            </div>
+            <div class="license-skip" id="es5-skip" onclick="finishEnrollment()">I'm a kabadi — no license needed →</div>
+            <div class="enroll-nav" style="margin-top:8px">
+              <button class="enroll-back" id="es5-back" onclick="goStep(4)">← Back</button>
+              <button class="enroll-next" id="es5-submit" onclick="finishEnrollment()"><span id="es5-next">Submit for Approval</span> →</button>
+            </div>
+          </div>
+
+          <!-- Enrollment success -->
+          <div class="enroll-success" id="enroll-success">
+            <div class="enroll-success-icon">🎉</div>
+            <div class="enroll-success-title" id="esuc-title">You're Enrolled!</div>
+            <div class="enroll-success-sub" id="esuc-sub">Welcome to SwachhConnect. Your profile is now live on the map.</div>
+            <div class="enroll-id-box">
+              <div class="enroll-id-label" id="esuc-id-lbl">Collector ID</div>
+              <div class="enroll-id-val" id="enroll-id">SC-GR-00847</div>
+              <div class="enroll-id-sub" id="esuc-id-sub">Instant approval · Basic tier · Kabadi</div>
+            </div>
+            <div style="font-size:11.5px;color:var(--ink-3);line-height:1.7;margin-bottom:16px" id="esuc-sms">Your QR profile card will be sent via SMS.</div>
+            <button class="enroll-hero-btn" style="background:var(--green);color:white" onclick="closeEnrollAfterSuccess()"><span id="esuc-btn">View My Profile</span> →</button>
+          </div>
+        </div>
+        <!-- end form -->
+
+        <div class="section-divider">
+          <div class="section-divider-line"></div>
+          <div class="section-divider-text" id="nearby-lbl">Collectors near you</div>
+          <div class="section-divider-line"></div>
+        </div>
+
+        <div class="filter-row" id="filter-row">
+          <div class="filter-chip active" onclick="filterCollectors('all',this)" id="fc-all">All Nearby</div>
+          <div class="filter-chip" onclick="filterCollectors('kabadi',this)" id="fc-kabadi">Kabadi</div>
+          <div class="filter-chip" onclick="filterCollectors('ewaste',this)" id="fc-ewaste">E-Waste</div>
+          <div class="filter-chip" onclick="filterCollectors('bio',this)" id="fc-bio">Biomedical</div>
+          <div class="filter-chip" onclick="filterCollectors('cd',this)" id="fc-cd">C&amp;D Debris</div>
+        </div>
+        <div class="collectors-list" id="collectors-list"></div>
+        <div class="enroll-cta"></div>
+      </div>
+    </div>
+
+    <!-- RATES -->
+    <div class="screen" id="screen-rates">
+      <div class="screen-inner">
+        <div class="rates-header">
+          <div class="section-title" id="rates-title">Live Scrap Rates</div>
+          <div class="rates-updated"><div class="live-dot"></div> <span id="rates-updated">Updated today, 9:30 AM</span></div>
+        </div>
+        <div class="city-selector">
+          <button class="city-btn active" onclick="setCity('Delhi',this)">Delhi NCR</button>
+          <button class="city-btn" onclick="setCity('Mumbai',this)">Mumbai</button>
+          <button class="city-btn" onclick="setCity('Bengaluru',this)">Bengaluru</button>
+          <button class="city-btn" onclick="setCity('Chennai',this)">Chennai</button>
+        </div>
+        <div id="rates-content"></div>
+        <div class="rate-disclaimer" style="margin-bottom:20px">
+          <p id="rates-disclaimer">Rates are indicative, based on mandi data + collector submissions. Actual prices may vary ±15% based on grade and quantity.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div class="screen" id="screen-report">
+      <div class="success-overlay" id="success-overlay">
+        <div class="success-icon">✅</div>
+        <div class="success-title" id="suc-title">Report Submitted!</div>
+        <div class="success-sub" id="suc-sub">Your complaint has been sent to the Ward Officer, Gurugram Municipal Corporation (GMC).</div>
+        <div class="ticket-box">
+          <div class="ticket-label" id="suc-ticket-lbl">Ticket Number</div>
+          <div class="ticket-num" id="ticket-num">DL-2026-04871</div>
+          <div class="ticket-sla" id="suc-sla">Expected resolution: within 4 hours</div>
+        </div>
+        <div style="font-size:12px;color:var(--ink-4);margin-bottom:16px" id="suc-sms">You will receive an SMS update on your registered number</div>
+        <button class="btn-primary" onclick="goToMyRequests()" style="width:220px;margin-bottom:10px" id="suc-track-btn">📋 Track in My Requests</button>
+        <button class="btn-secondary" onclick="resetReport()" style="width:220px" id="suc-back-btn">Back to Home</button>
+      </div>
+
+      <div class="report-form">
+        <div class="form-section">
+          <div class="form-label"><span class="label-step">1</span> <span id="rep-lbl1">Type of Issue</span></div>
+          <div class="chips-wrap" id="type-chips">
+            <div class="type-chip urgent" onclick="selectType(this,'animal')" id="chip-animal">🐕 Dead Animal</div>
+            <div class="type-chip urgent" onclick="selectType(this,'bio')" id="chip-bio">🧪 Hospital Waste</div>
+            <div class="type-chip urgent" onclick="selectType(this,'spill')" id="chip-spill">☣️ Chemical Spill</div>
+            <div class="type-chip" onclick="selectType(this,'dump')" id="chip-dump">🗑️ Illegal Dumping</div>
+            <div class="type-chip" onclick="selectType(this,'open')" id="chip-open">♻️ Open Garbage</div>
+            <div class="type-chip" onclick="selectType(this,'cd')" id="chip-cd">🧱 Debris on Road</div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label"><span class="label-step">2</span> <span id="rep-lbl2">Location</span></div>
+          <div class="location-input-wrap">
+            <input class="form-input" type="text" id="loc-input" />
+            <button class="locate-btn" onclick="useGPS()">📍</button>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label"><span class="label-step">3</span> <span id="rep-lbl3">Severity</span></div>
+          <div class="severity-row">
+            <button class="sev-btn sev-low" id="sev-low" onclick="setSev(this,'low')">Low</button>
+            <button class="sev-btn sev-med active" id="sev-med" onclick="setSev(this,'med')">Medium</button>
+            <button class="sev-btn sev-high" id="sev-high" onclick="setSev(this,'high')">High / Urgent</button>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label"><span class="label-step">4</span> <span id="rep-lbl4">Photo</span></div>
+          <div class="photo-upload" onclick="showToast(T('cam_t'),T('cam_b'))">
+            <div class="photo-upload-icon">📷</div>
+            <div class="photo-upload-text" id="rep-photo-txt">Tap to add a photo</div>
+            <div class="photo-upload-sub" id="rep-photo-sub">Helps the field team respond faster</div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-label"><span class="label-step">5</span> <span id="rep-lbl5">Description</span></div>
+          <textarea class="form-input form-textarea" id="report-desc"></textarea>
+        </div>
+      </div>
+      <div class="submit-area">
+        <button class="btn-primary" id="rep-submit-btn" onclick="guardedSubmitReport()">📤 Submit to Municipality</button>
+        <div id="rep-login-hint" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;padding:8px 12px;background:var(--amber-light);border-radius:8px;border:1px solid #FCD34D;cursor:pointer" onclick="showLoginModal()">
+          <span style="font-size:13px">🔐</span>
+          <span style="font-size:11px;color:#92400E" id="rep-login-hint-txt">Login required to submit · Tap to login</span>
+        </div>
+        <div id="rep-logged-in-hint" style="display:none;font-size:11px;color:var(--ink-4);text-align:center;margin-top:8px" id="rep-anon">Submitting as <strong id="rep-user-name"></strong> · Ticket SMS on your number</div>
+      </div>
+    </div>
+
+    <!-- ══ MY REQUESTS SCREEN ══ -->
+    <div class="screen" id="screen-myrequests">
+      <div class="screen-inner">
+        <div id="myrequests-logged-out" style="display:none">
+          <div class="mr-login-prompt">
+            <div class="mr-login-prompt-icon">🔐</div>
+            <div class="mr-login-prompt-title" id="mr-login-title">Login to see your requests</div>
+            <div class="mr-login-prompt-sub" id="mr-login-sub">Your complaint history, ticket status, and escalation options are available after login.</div>
+            <button class="btn-primary" style="max-width:200px;margin:0 auto" onclick="showLoginModal()" id="mr-login-btn">Login / Sign Up</button>
+          </div>
+        </div>
+        <div id="myrequests-content" style="display:none">
+          <div class="myrequests-header">
+            <div class="section-title" id="mr-title">My Requests</div>
+            <div style="font-size:11px;color:var(--ink-4)" id="mr-subtitle">All complaints you've filed</div>
+          </div>
+          <div class="myrequests-summary">
+            <div class="mrsumm-card">
+              <div class="mrsumm-val green" id="mr-s-total">7</div>
+              <div class="mrsumm-lbl" id="mr-s-total-lbl">Total Filed</div>
+            </div>
+            <div class="mrsumm-card">
+              <div class="mrsumm-val amber" id="mr-s-open">3</div>
+              <div class="mrsumm-lbl" id="mr-s-open-lbl">In Progress</div>
+            </div>
+            <div class="mrsumm-card">
+              <div class="mrsumm-val green" id="mr-s-resolved">4</div>
+              <div class="mrsumm-lbl" id="mr-s-resolved-lbl">Resolved</div>
+            </div>
+          </div>
+          <div class="mr-filter-row">
+            <div class="mr-chip active" onclick="filterRequests('all',this)" id="mrf-all">All</div>
+            <div class="mr-chip" onclick="filterRequests('open',this)" id="mrf-open">Open</div>
+            <div class="mr-chip" onclick="filterRequests('inprogress',this)" id="mrf-inprogress">In Progress</div>
+            <div class="mr-chip" onclick="filterRequests('resolved',this)" id="mrf-resolved">Resolved</div>
+          </div>
+          <div class="requests-list" id="requests-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ULB DASHBOARD SCREEN ══ -->
+    <div class="screen" id="screen-ulb">
+      <div class="screen-inner">
+        <div class="p2-header">
+          <div class="p2-badge">⚡ Phase 2 · ULB Dashboard</div>
+          <div class="p2-header-title" id="ulb-title">Municipality Dashboard</div>
+          <div class="p2-header-sub" id="ulb-sub">GMC Ward 12 · Sector 67 · Live civic issues</div>
+        </div>
+
+        <div class="stat-card-grid">
+          <div class="stat-card">
+            <div class="stat-card-val" id="ulb-s1v">47</div>
+            <div class="stat-card-lbl" id="ulb-s1l">Open Tickets</div>
+            <div class="stat-card-trend up" id="ulb-s1t">↑ 8 today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-val" id="ulb-s2v">91%</div>
+            <div class="stat-card-lbl" id="ulb-s2l">4-hr SLA Met</div>
+            <div class="stat-card-trend up" id="ulb-s2t">↑ vs 83% last week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-val" id="ulb-s3v">12</div>
+            <div class="stat-card-lbl" id="ulb-s3l">Urgent (< 2 hrs)</div>
+            <div class="stat-card-trend dn" id="ulb-s3t">↓ 3 resolved</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-val" id="ulb-s4v">1.4t</div>
+            <div class="stat-card-lbl" id="ulb-s4l">Waste Removed</div>
+            <div class="stat-card-trend neu" id="ulb-s4t">Today · all types</div>
+          </div>
+        </div>
+
+        <div class="ulb-chart-wrap" style="margin-top:12px">
+          <div class="ulb-chart-title" id="ulb-chart-title">Weekly tickets by category</div>
+          <div class="bar-chart" id="ulb-bar-chart"></div>
+        </div>
+
+        <div class="p2-section">
+          <div class="p2-section-title">
+            <span id="ulb-sla-title">SLA Performance by Type</span>
+          </div>
+          <div id="ulb-sla-rows"></div>
+        </div>
+
+        <div class="ward-selector">
+          <button class="ward-btn active" onclick="setWard('12',this)">Ward 12</button>
+          <button class="ward-btn" onclick="setWard('13',this)">Ward 13</button>
+          <button class="ward-btn" onclick="setWard('14',this)">Ward 14</button>
+          <button class="ward-btn" onclick="setWard('15',this)">Ward 15</button>
+        </div>
+
+        <div class="p2-section">
+          <div class="p2-section-title">
+            <span id="ulb-tickets-title">Live Ticket Queue</span>
+            <span class="p2-section-action" id="ulb-assign-all" onclick="showToast('Bulk Assign','In production, assigns all open tickets to available field teams.')">Assign All →</span>
+          </div>
+        </div>
+        <div class="ticket-list" id="ticket-list"></div>
+      </div>
+    </div>
+
+    <!-- ══ BIOMEDICAL B2B SCREEN ══ -->
+    <div class="screen" id="screen-biomedical">
+      <div class="screen-inner">
+        <div class="p2-header">
+          <div class="p2-badge">🧬 Phase 2 · Biomedical B2B</div>
+          <div class="p2-header-title" id="bio-title">Biomedical Waste Portal</div>
+          <div class="p2-header-sub" id="bio-sub">Clinics · Hospitals · Labs · CPCB Compliant</div>
+        </div>
+
+        <div class="stat-card-grid">
+          <div class="stat-card">
+            <div class="stat-card-val">24</div>
+            <div class="stat-card-lbl" id="bio-s1l">Active Manifests</div>
+            <div class="stat-card-trend up">↑ 3 new today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-val">100%</div>
+            <div class="stat-card-lbl" id="bio-s2l">CPCB Compliance</div>
+            <div class="stat-card-trend up">All manifests closed</div>
+          </div>
+        </div>
+
+        <button class="bio-new-btn" style="margin-top:12px" onclick="showBioForm()">
+          <span>+</span> <span id="bio-new-btn-lbl">New Pickup Manifest</span>
+        </button>
+
+        <div id="bio-form-wrap" style="display:none;margin:0 16px;background:var(--bg-card);border:2px solid #7C3AED;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)">
+          <div style="font-size:14px;font-weight:700;color:var(--ink);font-family:var(--font-display);margin-bottom:4px" id="bio-form-title">New Manifest</div>
+          <div style="font-size:12px;color:var(--ink-3);margin-bottom:14px" id="bio-form-sub">Select waste categories for this pickup</div>
+          <div class="bio-type-grid" id="bio-type-grid">
+            <div class="bio-type-chip" onclick="this.classList.toggle('sel')">🔴 Infectious</div>
+            <div class="bio-type-chip" onclick="this.classList.toggle('sel')">🟡 Sharps</div>
+            <div class="bio-type-chip" onclick="this.classList.toggle('sel')">🟠 Cytotoxic</div>
+            <div class="bio-type-chip" onclick="this.classList.toggle('sel')">🟢 General Clinical</div>
+            <div class="bio-type-chip" onclick="this.classList.toggle('sel')">🔵 Liquid Chemical</div>
+            <div class="bio-type-chip" onclick="this.classList.toggle('sel')">⚫ Anatomical</div>
+          </div>
+          <div style="margin-top:12px">
+            <div class="estep-label" id="bio-qty-lbl">Estimated Quantity (kg)</div>
+            <input class="estep-input" type="number" placeholder="e.g. 12" style="margin-top:4px"/>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="enroll-back" onclick="closeBioForm()" id="bio-cancel-btn">Cancel</button>
+            <button class="enroll-next" onclick="submitManifest()" id="bio-submit-btn">Request Pickup →</button>
+          </div>
+        </div>
+
+        <div class="p2-section">
+          <div class="p2-section-title"><span id="bio-manifests-title">Recent Manifests</span></div>
+        </div>
+        <div style="padding:0 16px" id="bio-manifest-list"></div>
+      </div>
+    </div>
+
+    <!-- ══ ANALYTICS SCREEN ══ -->
+    <div class="screen" id="screen-analytics">
+      <div class="screen-inner">
+        <div class="p2-header">
+          <div class="p2-badge">📊 Phase 2 · Analytics API</div>
+          <div class="p2-header-title" id="ana-title">Waste Flow Analytics</div>
+          <div class="p2-header-sub" id="ana-sub">Delhi NCR · Last 30 days · Anonymised</div>
+        </div>
+
+        <div class="analytics-tabs">
+          <button class="atab active" onclick="setATab('composition',this)" id="atab-composition">Composition</button>
+          <button class="atab" onclick="setATab('trend',this)" id="atab-trend">Trend</button>
+          <button class="atab" onclick="setATab('hotspots',this)" id="atab-hotspots">Hotspots</button>
+          <button class="atab" onclick="setATab('collectors',this)" id="atab-collectors">Collectors</button>
+        </div>
+
+        <div id="analytics-content"></div>
+
+        <div class="analytics-insight">
+          <div class="ai-icon">🤖</div>
+          <div class="ai-title" id="ai-title">AI Insight · This Week</div>
+          <div class="ai-text" id="ai-text">Plastic volume spiked 34% in Wards 12–14 (Sector 67–69) post-Diwali. Recommend deploying 2 additional dry waste collectors near Southern Periphery Road on weekends. E-waste rates have risen ↑12% — optimal time for citizen outreach.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ COLLECTOR WELFARE SCREEN ══ -->
+    <div class="screen" id="screen-welfare">
+      <div class="screen-inner">
+        <div class="p2-header">
+          <div class="p2-badge">🤝 Phase 2 · Welfare Stack</div>
+          <div class="p2-header-title" id="wf-title">Collector Welfare</div>
+          <div class="p2-header-sub" id="wf-sub">Insurance · Training · Income · Credit</div>
+        </div>
+
+        <div class="income-cert-box" style="margin-top:12px">
+          <div class="icb-header">
+            <div class="icb-icon">📜</div>
+            <div>
+              <div class="icb-title" id="wf-cert-title">Income Certificate Ready</div>
+              <div class="icb-meta" id="wf-cert-sub">Ramesh Mishra · SC-GR-00847 · FY 2025–26</div>
+            </div>
+          </div>
+          <div class="icb-stats">
+            <div class="icb-stat">
+              <div class="icb-val">340</div>
+              <div class="icb-lbl" id="wf-cert-pickups">Pickups</div>
+            </div>
+            <div class="icb-stat">
+              <div class="icb-val">₹1.2L</div>
+              <div class="icb-lbl" id="wf-cert-income">Est. Income</div>
+            </div>
+            <div class="icb-stat">
+              <div class="icb-val">4.8★</div>
+              <div class="icb-lbl" id="wf-cert-rating">Rating</div>
+            </div>
+          </div>
+          <button class="btn-primary" style="margin-top:10px;font-size:12px;padding:9px" id="wf-cert-btn" onclick="showToast('Certificate','Generating PDF certificate for NBFC / MFI credit application.')">Download Income Certificate (PDF)</button>
+        </div>
+
+        <div class="p2-section">
+          <div class="p2-section-title"><span id="wf-schemes-title">Government Schemes</span></div>
+        </div>
+        <div style="padding:0 16px" id="welfare-schemes-list"></div>
+
+        <div class="p2-section" style="margin-top:4px">
+          <div class="p2-section-title"><span id="wf-training-title">Skill Training (NSDC)</span></div>
+        </div>
+        <div id="welfare-training-list"></div>
+      </div>
+    </div>
+
+  </div><!-- /screen-container -->
+
+  <!-- LOGIN MODAL -->
+  <div class="login-overlay" id="login-overlay" onclick="closeLoginOnOverlay(event)">
+    <div class="login-sheet" onclick="event.stopPropagation()">
+      <div class="login-handle"></div>
+
+      <!-- Step 1: Phone -->
+      <div class="login-step active" id="ls-1">
+        <div class="login-icon">🔐</div>
+        <div class="login-title" id="ls1-title">Login to SwachhConnect</div>
+        <div class="login-sub" id="ls1-sub">Enter your mobile number to receive a one-time password. Your identity stays private.</div>
+        <div class="login-field">
+          <div class="login-label" id="ls1-lbl-ph">Mobile Number</div>
+          <div style="display:flex;gap:8px">
+            <div style="padding:11px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--ink-3);background:var(--bg);white-space:nowrap;flex-shrink:0">🇮🇳 +91</div>
+            <input class="login-input" type="tel" id="l-phone" placeholder="98765 43210" maxlength="10" oninput="checkLoginPhone()" style="flex:1"/>
+          </div>
+        </div>
+        <div class="login-field">
+          <div class="login-label" id="ls1-lbl-name">Your Name</div>
+          <input class="login-input" type="text" id="l-name" oninput="checkLoginPhone()"/>
+        </div>
+        <button class="login-btn" id="ls1-btn" disabled onclick="sendLoginOTP()"><span id="ls1-btn-lbl">Send OTP →</span></button>
+        <div class="login-skip" id="ls1-skip" onclick="closeLoginModal()">Cancel</div>
+      </div>
+
+      <!-- Step 2: OTP -->
+      <div class="login-step" id="ls-2">
+        <div class="login-icon">📲</div>
+        <div class="login-title" id="ls2-title">Enter OTP</div>
+        <div class="login-sub" id="ls2-sub" style="margin-bottom:16px">6-digit code sent to your number.</div>
+        <div class="login-otp-row">
+          <input class="login-otp-input" type="tel" maxlength="1" id="l-otp0" oninput="loginOtpNext(this,0)"/>
+          <input class="login-otp-input" type="tel" maxlength="1" id="l-otp1" oninput="loginOtpNext(this,1)"/>
+          <input class="login-otp-input" type="tel" maxlength="1" id="l-otp2" oninput="loginOtpNext(this,2)"/>
+          <input class="login-otp-input" type="tel" maxlength="1" id="l-otp3" oninput="loginOtpNext(this,3)"/>
+          <input class="login-otp-input" type="tel" maxlength="1" id="l-otp4" oninput="loginOtpNext(this,4)"/>
+          <input class="login-otp-input" type="tel" maxlength="1" id="l-otp5" oninput="loginOtpNext(this,5)"/>
+        </div>
+        <div class="login-otp-hint" id="ls2-hint">Demo OTP: <strong>1 2 3 4 5 6</strong></div>
+        <div class="login-otp-resend" id="ls2-resend" onclick="showToast('OTP Resent','New OTP sent.')">Resend OTP</div>
+        <button class="login-btn" id="ls2-btn" disabled onclick="verifyLoginOTP()"><span id="ls2-btn-lbl">Verify & Login →</span></button>
+        <div class="login-skip" onclick="goLoginStep(1)">← Back</div>
+      </div>
+
+      <!-- Step 3: Success -->
+      <div class="login-step" id="ls-3">
+        <div class="login-icon">🎉</div>
+        <div class="login-title" id="ls3-title">You're logged in!</div>
+        <div class="login-sub" id="ls3-sub">Welcome back. You can now submit reports and track your complaints.</div>
+        <div style="background:var(--green-light);border:1.5px solid var(--green-mid);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center">
+          <div style="font-size:28px;margin-bottom:6px" id="ls3-avatar">👤</div>
+          <div style="font-size:15px;font-weight:700;color:var(--ink)" id="ls3-name-display">Rahul Kumar</div>
+          <div style="font-size:11px;color:var(--green-mid);margin-top:3px" id="ls3-phone-display">+91 98765 43210</div>
+        </div>
+        <button class="login-btn" onclick="completeLogin()"><span id="ls3-btn-lbl">Continue →</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLLECTOR DETAIL MODAL -->
+  <div class="modal-overlay" id="detail-modal" onclick="closeModal('detail-modal')">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div id="detail-content"></div>
+    </div>
+  </div>
+
+  <div class="proto-tag">PROTOTYPE · PHASE 0 + PHASE 2 · SWACHHCONNECT</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// I18N — TRANSLATION STRINGS
+// ═══════════════════════════════════════════════════════
+const STRINGS = {
+  en: {
+    // Header
+    hdr_sub: 'स्वच्छ कनेक्ट · Waste Made Simple',
+    hdr_loc: 'M3M Urbana, Sector 67, Gurgaon 122101',
+    hdr_change: 'Change',
+    gps_title: 'Location updated', gps_body: 'Using GPS: 28.4089° N, 77.0927° E',
+    // Nav
+    nav_home:'Dispose', nav_collectors:'Collectors', nav_rates:'Rates', nav_report:'Report',
+    nav_ulb:'ULB', nav_biomedical:'BioMed', nav_analytics:'Analytics', nav_welfare:'Welfare',
+    // Home
+    emg_title:'Emergency Hazard Report', emg_sub:'Dead animal · Open hospital waste · Chemical spill',
+    home_sec_title:'What do you want to dispose?', home_sec_sub:'Tap to learn',
+    // Waste tiles
+    wt_solid_lbl:'Household', wt_solid_sub:'Dry & wet',
+    wt_ewaste_lbl:'E-Waste', wt_ewaste_sub:'Electronics',
+    wt_construction_lbl:'Construction', wt_construction_sub:'C&D debris',
+    wt_biomedical_lbl:'Biomedical', wt_biomedical_sub:'Clinical waste',
+    wt_religious_lbl:'Religious', wt_religious_sub:'Flowers & pooja',
+    wt_liquid_lbl:'Liquid / Oil', wt_liquid_sub:'Chemical',
+    wt_scrap_lbl:'Scrap', wt_scrap_sub:'Kabadi items',
+    wt_animal_lbl:'Animal', wt_animal_sub:'Carcass',
+    wt_garden_lbl:'Garden', wt_garden_sub:'Wet / organic',
+    // Info panel close / action
+    info_close:'✕',
+    // Enroll hero
+    eh_badge:'Now enrolling',
+    eh_title:'Are you a Kabadiwala\nor Waste Collector?',
+    eh_sub:'Join SwachhConnect free. Get listed on the map, receive pickup requests directly, and access live scrap rate data.',
+    eh_s1:'Enrollment fee', eh_s2:'To complete', eh_s3:'Enrolled nearby',
+    eh_cta:'Start Free Enrollment',
+    eh_p1:'✓ Works on any phone', eh_p2:'✓ Aadhaar KYC', eh_p3:'✓ Instant approval for kabadis',
+    // Progress labels
+    prog1:'Phone', prog2:'OTP', prog3:'KYC', prog4:'Services', prog5:'Docs',
+    // Step 1
+    es1_title:'Enter your mobile number',
+    es1_sub:"We'll send a one-time password. No internet required — works on 2G/3G.",
+    es1_lbl_ph:'Mobile Number', es1_lbl_name:'Your Name', es1_lbl_lang:'Preferred Language',
+    es1_cancel:'✕ Cancel', es1_next:'Send OTP',
+    e_name_placeholder:'As on Aadhaar card',
+    e_area_placeholder:'e.g. Sector 67, 68 or Southern Periphery Rd',
+    loc_input_placeholder:'e.g. Near M3M Gate 2, Sector 67...',
+    rep_desc_placeholder:'Describe what you see and since how long it has been here...',
+    // Step 2
+    es2_title:'Enter OTP',
+    otp_desc:'A 6-digit code has been sent to your number. Enter it below.',
+    es2_hint:'Demo OTP: ', es2_resend:'Resend OTP', es2_verify:'Verify',
+    otp_resent_t:'OTP Resent', otp_resent_b:'New OTP sent to your mobile.',
+    // Step 3
+    es3_title:'Aadhaar e-KYC',
+    es3_sub:'Verify your identity via Aadhaar OTP. Your data is encrypted and UIDAI-compliant.',
+    es3_lbl_a:'Aadhaar Number', es3_lbl_s:'Live Selfie',
+    es3_selfie_txt:'Tap to open front camera',
+    es3_selfie_hint:'Face must match your Aadhaar photo · Liveness check enabled',
+    es3_next:'Confirm KYC',
+    kyc_ready_t:'KYC Ready', kyc_ready_b:'Aadhaar accepted. Tap Confirm KYC.',
+    cam_t:'Camera', cam_b:'In production, this opens the front camera for a liveness check.',
+    upload_t:'Upload', upload_b:'In production, opens file picker for document scan.',
+    // Step 4
+    es4_title:'What do you collect?',
+    es4_sub:'Select all that apply. This determines which citizen requests you appear for.',
+    es4_lbl_area:'Service Area', es4_next:'Next',
+    wst_kabadi:'Dry Scrap', wsn_kabadi:'Paper, metal, plastic',
+    wst_ewaste:'E-Waste', wsn_ewaste:'Needs certification',
+    wst_bio:'Biomedical', wsn_bio:'CPCB license needed',
+    wst_cd:'C&D Debris', wsn_cd:'Vehicle required',
+    wst_garden:'Wet / Organic', wsn_garden:'Garden & kitchen',
+    wst_religious:'Religious', wsn_religious:'Flowers, nirmalya',
+    // Step 5
+    es5_title:'License Documents',
+    es5_sub:'Upload relevant licenses. Kabadis are exempt — use the skip link below.',
+    es5_info:'Required for: E-Waste (PRO cert), Biomedical (CPCB BMW auth), C&D Hauler (RC + permit). Kabadis: no license needed.',
+    es5_upload_txt:'Tap to upload license / certificate',
+    es5_upload_sub:'JPG, PNG or PDF · Max 5 MB',
+    es5_skip:"I'm a kabadi — no license needed →",
+    es5_next:'Submit for Approval',
+    // Enroll success
+    esuc_title:"You're Enrolled!",
+    esuc_sub:'Welcome to SwachhConnect. Your profile is now live on the map. Citizens in your area can see and contact you.',
+    esuc_id_lbl:'Collector ID',
+    esuc_id_sub:'Instant approval · Basic tier · Kabadi',
+    esuc_sms:'Your QR profile card will be sent via SMS. Complete your rate listing to get more requests.',
+    esuc_btn:'View My Profile',
+    // Collectors
+    nearby_lbl:'Collectors near you',
+    fc_all:'All Nearby', fc_kabadi:'Kabadi', fc_ewaste:'E-Waste', fc_bio:'Biomedical', fc_cd:'C&D Debris',
+    call_lbl:'📞 Call', wa_lbl:'💬 WhatsApp',
+    calling_t:'Calling...', calling_b_pfx:'In production, this dials directly.',
+    wa_t:'WhatsApp', wa_b_pfx:'Opening chat on WhatsApp Business.',
+    stat_rating:'Rating', stat_reviews:'Reviews', stat_pickups:'Pickups', stat_since:'Since',
+    cur_rates:'Current Buy Rates',
+    call_now:'📞 Call Now', close_btn:'Close',
+    // Rates
+    rates_title:'Live Scrap Rates', rates_updated:'Updated today, 9:30 AM',
+    rates_disclaimer:'Rates are indicative, based on mandi data + collector submissions. Actual prices may vary ±15% based on grade and quantity. Always confirm with the collector before selling.',
+    // Report
+    rep_lbl1:'Type of Issue', rep_lbl2:'Location', rep_lbl3:'Severity',
+    rep_lbl4:'Photo (optional)', rep_lbl5:'Description',
+    chip_animal:'🐕 Dead Animal', chip_bio:'🧪 Hospital Waste', chip_spill:'☣️ Chemical Spill',
+    chip_dump:'🗑️ Illegal Dumping', chip_open:'♻️ Open Garbage', chip_cd:'🧱 Debris on Road',
+    sev_low:'Low', sev_med:'Medium', sev_high:'High / Urgent',
+    rep_photo_txt:'Tap to add a photo', rep_photo_sub:'Helps the field team respond faster',
+    rep_submit:'📤 Submit to Municipality',
+    rep_anon:'Reported anonymously · Ticket SMS sent to your number',
+    gps_loc:'28.4089° N, 77.0927° E · M3M अर्बना, सेक्टर 67',
+    gps_toast_t:'Location detected', gps_toast_b:'GPS coordinates captured for the ward office.',
+    suc_title:'Report Submitted!',
+    suc_sub:'Your complaint has been sent to the Ward Officer, Gurugram Municipal Corporation (GMC).',
+    suc_ticket_lbl:'Ticket Number',
+    suc_sla:'Expected resolution: within 4 hours',
+    suc_sms:'You will receive an SMS update on your registered number',
+    suc_back_btn:'Back to Home',
+  },
+  hi: {
+    hdr_sub: 'Waste Made Simple · स्वच्छ भारत',
+    hdr_loc: 'M3M अर्बना, सेक्टर 67, गुरुग्राम 122101',
+    hdr_change: 'बदलें',
+    gps_title: 'स्थान अपडेट हुआ', gps_body: 'GPS: 28.4089° N, 77.0927° E',
+    nav_home:'निपटान', nav_collectors:'संग्रहक', nav_rates:'दरें', nav_report:'रिपोर्ट',
+    nav_ulb:'नगर निगम', nav_biomedical:'बायोमेड', nav_analytics:'विश्लेषण', nav_welfare:'कल्याण',
+    emg_title:'आपातकालीन खतरे की रिपोर्ट', emg_sub:'मृत पशु · खुला अस्पताल कचरा · रासायनिक रिसाव',
+    home_sec_title:'आप क्या निपटाना चाहते हैं?', home_sec_sub:'जानने के लिए टैप करें',
+    wt_solid_lbl:'घरेलू कचरा', wt_solid_sub:'सूखा और गीला',
+    wt_ewaste_lbl:'ई-वेस्ट', wt_ewaste_sub:'इलेक्ट्रॉनिक्स',
+    wt_construction_lbl:'निर्माण', wt_construction_sub:'मलबा',
+    wt_biomedical_lbl:'बायोमेडिकल', wt_biomedical_sub:'चिकित्सा अपशिष्ट',
+    wt_religious_lbl:'धार्मिक', wt_religious_sub:'फूल और पूजा',
+    wt_liquid_lbl:'तरल / तेल', wt_liquid_sub:'रसायन',
+    wt_scrap_lbl:'रद्दी', wt_scrap_sub:'कबाड़ी सामान',
+    wt_animal_lbl:'पशु', wt_animal_sub:'मृत जानवर',
+    wt_garden_lbl:'बगीचा', wt_garden_sub:'गीला / जैविक',
+    info_close:'✕',
+    eh_badge:'अभी नामांकन हो रहा है',
+    eh_title:'क्या आप कबाड़ी या\nकचरा संग्रहक हैं?',
+    eh_sub:'SwachhConnect में मुफ्त जुड़ें। नक्शे पर दर्ज हों, सीधे पिकअप अनुरोध पाएं और लाइव भाव देखें।',
+    eh_s1:'नामांकन शुल्क', eh_s2:'पूरा करने में', eh_s3:'पास में नामांकित',
+    eh_cta:'मुफ्त नामांकन शुरू करें',
+    eh_p1:'✓ किसी भी फोन पर', eh_p2:'✓ आधार KYC', eh_p3:'✓ कबाड़ी के लिए तत्काल मंजूरी',
+    prog1:'फोन', prog2:'OTP', prog3:'KYC', prog4:'सेवाएं', prog5:'दस्तावेज',
+    es1_title:'अपना मोबाइल नंबर दर्ज करें',
+    es1_sub:'हम एक OTP भेजेंगे। इंटरनेट जरूरी नहीं — 2G/3G पर काम करता है।',
+    es1_lbl_ph:'मोबाइल नंबर', es1_lbl_name:'आपका नाम', es1_lbl_lang:'पसंदीदा भाषा',
+    es1_cancel:'✕ रद्द करें', es1_next:'OTP भेजें',
+    e_name_placeholder:'आधार कार्ड पर जैसा है',
+    e_area_placeholder:'जैसे: सेक्टर 67, 68 या साउदर्न पेरिफेरी रोड',
+    loc_input_placeholder:'जैसे: M3M गेट 2, सेक्टर 67 के पास...',
+    rep_desc_placeholder:'आप क्या देख रहे हैं और कब से है, संक्षेप में बताएं...',
+    es2_title:'OTP दर्ज करें',
+    otp_desc:'आपके नंबर पर 6 अंकों का कोड भेजा गया है। नीचे दर्ज करें।',
+    es2_hint:'डेमो OTP: ', es2_resend:'OTP दोबारा भेजें', es2_verify:'सत्यापित करें',
+    otp_resent_t:'OTP दोबारा भेजा', otp_resent_b:'नया OTP आपके मोबाइल पर भेजा गया।',
+    es3_title:'आधार e-KYC',
+    es3_sub:'आधार OTP से पहचान सत्यापित करें। डेटा एन्क्रिप्टेड और UIDAI-अनुपालित है।',
+    es3_lbl_a:'आधार नंबर', es3_lbl_s:'लाइव सेल्फी',
+    es3_selfie_txt:'फ्रंट कैमरा खोलने के लिए टैप करें',
+    es3_selfie_hint:'फोटो आधार से मेल खानी चाहिए · लाइवनेस जांच सक्रिय',
+    es3_next:'KYC पुष्टि करें',
+    kyc_ready_t:'KYC तैयार', kyc_ready_b:'आधार स्वीकार हुआ। KYC पुष्टि करें।',
+    cam_t:'कैमरा', cam_b:'प्रोडक्शन में यह लाइवनेस चेक के लिए फ्रंट कैमरा खोलता है।',
+    upload_t:'अपलोड', upload_b:'प्रोडक्शन में दस्तावेज स्कैन के लिए फाइल पिकर खुलता है।',
+    es4_title:'आप क्या संग्रह करते हैं?',
+    es4_sub:'सभी लागू विकल्प चुनें। इससे तय होगा कि आप किन नागरिक अनुरोधों में दिखें।',
+    es4_lbl_area:'सेवा क्षेत्र', es4_next:'आगे',
+    wst_kabadi:'सूखी रद्दी', wsn_kabadi:'कागज, धातु, प्लास्टिक',
+    wst_ewaste:'ई-वेस्ट', wsn_ewaste:'प्रमाणन जरूरी',
+    wst_bio:'बायोमेडिकल', wsn_bio:'CPCB लाइसेंस चाहिए',
+    wst_cd:'निर्माण मलबा', wsn_cd:'वाहन जरूरी',
+    wst_garden:'गीला / जैविक', wsn_garden:'बगीचा और रसोई',
+    wst_religious:'धार्मिक', wsn_religious:'फूल, निर्माल्य',
+    es5_title:'लाइसेंस दस्तावेज',
+    es5_sub:'संबंधित लाइसेंस अपलोड करें। कबाड़ियों के लिए छूट है।',
+    es5_info:'जरूरी: ई-वेस्ट (PRO सर्ट), बायोमेडिकल (CPCB BMW), C&D (RC + परमिट)। कबाड़ी: कोई लाइसेंस नहीं।',
+    es5_upload_txt:'लाइसेंस / प्रमाण पत्र अपलोड करें',
+    es5_upload_sub:'JPG, PNG या PDF · अधिकतम 5 MB',
+    es5_skip:'मैं कबाड़ी हूं — कोई लाइसेंस नहीं →',
+    es5_next:'मंजूरी के लिए जमा करें',
+    esuc_title:'आप नामांकित हो गए!',
+    esuc_sub:'SwachhConnect में आपका स्वागत है। आपकी प्रोफाइल नक्शे पर लाइव है।',
+    esuc_id_lbl:'संग्रहक ID',
+    esuc_id_sub:'तत्काल मंजूरी · बेसिक स्तर · कबाड़ी',
+    esuc_sms:'आपका QR प्रोफाइल कार्ड SMS से भेजा जाएगा।',
+    esuc_btn:'मेरी प्रोफाइल देखें',
+    nearby_lbl:'आपके पास के संग्रहक',
+    fc_all:'सभी पास में', fc_kabadi:'कबाड़ी', fc_ewaste:'ई-वेस्ट', fc_bio:'बायोमेडिकल', fc_cd:'निर्माण मलबा',
+    call_lbl:'📞 कॉल', wa_lbl:'💬 WhatsApp',
+    calling_t:'कॉल हो रही है...', calling_b_pfx:'प्रोडक्शन में सीधे डायल होगा।',
+    wa_t:'WhatsApp', wa_b_pfx:'WhatsApp Business पर चैट खुलेगी।',
+    stat_rating:'रेटिंग', stat_reviews:'समीक्षाएं', stat_pickups:'पिकअप', stat_since:'से',
+    cur_rates:'वर्तमान खरीद दरें',
+    call_now:'📞 अभी कॉल करें', close_btn:'बंद करें',
+    rates_title:'लाइव रद्दी दरें', rates_updated:'आज सुबह 9:30 बजे अपडेट हुई',
+    rates_disclaimer:'दरें सांकेतिक हैं, मंडी डेटा और संग्रहक जमा से। वास्तविक कीमतें ग्रेड और मात्रा के अनुसार ±15% भिन्न हो सकती हैं।',
+    rep_lbl1:'समस्या का प्रकार', rep_lbl2:'स्थान', rep_lbl3:'गंभीरता',
+    rep_lbl4:'फोटो (वैकल्पिक)', rep_lbl5:'विवरण',
+    chip_animal:'🐕 मृत पशु', chip_bio:'🧪 अस्पताल कचरा', chip_spill:'☣️ रासायनिक रिसाव',
+    chip_dump:'🗑️ अवैध डंपिंग', chip_open:'♻️ खुला कचरा', chip_cd:'🧱 सड़क पर मलबा',
+    sev_low:'कम', sev_med:'मध्यम', sev_high:'अधिक / तत्काल',
+    rep_photo_txt:'फोटो जोड़ने के लिए टैप करें', rep_photo_sub:'फील्ड टीम को तेजी से मदद करता है',
+    rep_submit:'📤 नगर पालिका को जमा करें',
+    rep_anon:'अनाम रूप से रिपोर्ट · SMS टिकट आपके नंबर पर',
+    gps_loc:'28.4089° N, 77.0927° E · M3M अर्बना, सेक्टर 67',
+    gps_toast_t:'स्थान पहचाना गया', gps_toast_b:'GPS निर्देशांक दर्ज हुए।',
+    suc_title:'रिपोर्ट जमा हुई!',
+    suc_sub:'आपकी शिकायत वार्ड अधिकारी, दक्षिण दिल्ली नगर निगम को भेजी गई है।',
+    suc_ticket_lbl:'टिकट नंबर',
+    suc_sla:'अपेक्षित समाधान: 4 घंटे के भीतर',
+    suc_sms:'आपके पंजीकृत नंबर पर SMS अपडेट मिलेगा',
+    suc_back_btn:'होम पर वापस जाएं',
+  }
+};
+
+let currentLang = 'en';
+function T(key){ return STRINGS[currentLang][key] || STRINGS.en[key] || key; }
+
+// ═══════════════════════════════════════════════════════
+// APPLY TRANSLATIONS
+// ═══════════════════════════════════════════════════════
+function applyTranslations() {
+  const L = currentLang;
+  const phone = document.getElementById('phone');
+  phone.classList.toggle('hi', L === 'hi');
+
+  const set = (id, txt) => { const el=document.getElementById(id); if(el) el.textContent=txt; };
+  const setph = (id, txt) => { const el=document.getElementById(id); if(el) el.placeholder=txt; };
+
+  // Header
+  set('hdr-sub', T('hdr_sub'));
+  set('hdr-loc', T('hdr_loc'));
+  set('hdr-change', T('hdr_change'));
+  // Nav
+  set('nav-lbl-home', T('nav_home'));
+  set('nav-lbl-collectors', T('nav_collectors'));
+  set('nav-lbl-rates', T('nav_rates'));
+  set('nav-lbl-report', T('nav_report'));
+  // Home
+  set('emg-title', T('emg_title'));
+  set('emg-sub', T('emg_sub'));
+  set('home-sec-title', T('home_sec_title'));
+  set('home-sec-sub', T('home_sec_sub'));
+  // Enroll hero
+  set('eh-badge', T('eh_badge'));
+  document.getElementById('eh-title').innerHTML = T('eh_title').replace('\n','<br>');
+  set('eh-sub', T('eh_sub'));
+  set('eh-s1', T('eh_s1')); set('eh-s2', T('eh_s2')); set('eh-s3', T('eh_s3'));
+  set('eh-cta', T('eh_cta'));
+  set('eh-p1', T('eh_p1')); set('eh-p2', T('eh_p2')); set('eh-p3', T('eh_p3'));
+  // Progress
+  set('prog-lbl-1', T('prog1')); set('prog-lbl-2', T('prog2')); set('prog-lbl-3', T('prog3'));
+  set('prog-lbl-4', T('prog4')); set('prog-lbl-5', T('prog5'));
+  // Step 1
+  set('es1-title', T('es1_title')); set('es1-sub', T('es1_sub'));
+  set('es1-lbl-ph', T('es1_lbl_ph')); set('es1-lbl-name', T('es1_lbl_name')); set('es1-lbl-lang', T('es1_lbl_lang'));
+  set('es1-cancel', T('es1_cancel')); set('es1-next', T('es1_next'));
+  setph('e-name', T('e_name_placeholder'));
+  setph('e-area', T('e_area_placeholder'));
+  setph('loc-input', T('loc_input_placeholder'));
+  setph('report-desc', T('rep_desc_placeholder'));
+  // Step 2
+  set('es2-title', T('es2_title'));
+  set('otp-desc', T('otp_desc'));
+  const hintEl = document.getElementById('es2-hint');
+  if(hintEl) hintEl.innerHTML = T('es2_hint') + '<strong>1 2 3 4 5 6</strong>';
+  set('es2-resend', T('es2_resend')); set('es2-verify', T('es2_verify'));
+  // Step 3
+  set('es3-title', T('es3_title')); set('es3-sub', T('es3_sub'));
+  set('es3-lbl-a', T('es3_lbl_a')); set('es3-lbl-s', T('es3_lbl_s'));
+  set('es3-selfie-txt', T('es3_selfie_txt')); set('es3-selfie-hint', T('es3_selfie_hint'));
+  set('es3-next', T('es3_next'));
+  // Step 4
+  set('es4-title', T('es4_title')); set('es4-sub', T('es4_sub'));
+  set('es4-lbl-area', T('es4_lbl_area')); set('es4-next', T('es4_next'));
+  set('wst-kabadi', T('wst_kabadi')); set('wsn-kabadi', T('wsn_kabadi'));
+  set('wst-ewaste', T('wst_ewaste')); set('wsn-ewaste', T('wsn_ewaste'));
+  set('wst-bio', T('wst_bio')); set('wsn-bio', T('wsn_bio'));
+  set('wst-cd', T('wst_cd')); set('wsn-cd', T('wsn_cd'));
+  set('wst-garden', T('wst_garden')); set('wsn-garden', T('wsn_garden'));
+  set('wst-religious', T('wst_religious')); set('wsn-religious', T('wsn_religious'));
+  // Step 5
+  set('es5-title', T('es5_title')); set('es5-sub', T('es5_sub'));
+  set('es5-info', T('es5_info')); set('es5-upload-txt', T('es5_upload_txt'));
+  set('es5-upload-sub', T('es5_upload_sub')); set('es5-skip', T('es5_skip'));
+  set('es5-next', T('es5_next'));
+  // Enroll success
+  set('esuc-title', T('esuc_title')); set('esuc-sub', T('esuc_sub'));
+  set('esuc-id-lbl', T('esuc_id_lbl')); set('esuc-id-sub', T('esuc_id_sub'));
+  set('esuc-sms', T('esuc_sms')); set('esuc-btn', T('esuc_btn'));
+  // Collectors
+  set('nearby-lbl', T('nearby_lbl'));
+  set('fc-all', T('fc_all')); set('fc-kabadi', T('fc_kabadi')); set('fc-ewaste', T('fc_ewaste'));
+  set('fc-bio', T('fc_bio')); set('fc-cd', T('fc_cd'));
+  // Rates
+  set('rates-title', T('rates_title')); set('rates-updated', T('rates_updated'));
+  set('rates-disclaimer', T('rates_disclaimer'));
+  // Report
+  set('rep-lbl1', T('rep_lbl1')); set('rep-lbl2', T('rep_lbl2')); set('rep-lbl3', T('rep_lbl3'));
+  set('rep-lbl4', T('rep_lbl4')); set('rep-lbl5', T('rep_lbl5'));
+  set('chip-animal', T('chip_animal')); set('chip-bio', T('chip_bio')); set('chip-spill', T('chip_spill'));
+  set('chip-dump', T('chip_dump')); set('chip-open', T('chip_open')); set('chip-cd', T('chip_cd'));
+  set('sev-low', T('sev_low')); set('sev-med', T('sev_med')); set('sev-high', T('sev_high'));
+  set('rep-photo-txt', T('rep_photo_txt')); set('rep-photo-sub', T('rep_photo_sub'));
+  document.getElementById('rep-submit-btn').textContent = T('rep_submit');
+  set('rep-anon', T('rep_anon'));
+  // Report success
+  set('suc-title', T('suc_title')); set('suc-sub', T('suc_sub'));
+  set('suc-ticket-lbl', T('suc_ticket_lbl')); set('suc-sla', T('suc_sla'));
+  set('suc-sms', T('suc_sms')); set('suc-back-btn', T('suc_back_btn'));
+  const hi2 = currentLang==='hi';
+  const trackBtn = document.getElementById('suc-track-btn');
+  if(trackBtn) trackBtn.textContent = hi2 ? '📋 मेरे अनुरोध में ट्रैक करें' : '📋 Track in My Requests';
+  updateReportLoginHint();
+  // Re-render dynamic content
+  renderWasteGrid();
+  renderCollectors(currentFilter || 'all');
+  renderRates(currentCity || 'Delhi');
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btn-en').classList.toggle('active', lang==='en');
+  document.getElementById('btn-hi').classList.toggle('active', lang==='hi');
+  // Also sync the language select in the enroll form
+  const sel = document.getElementById('e-lang');
+  if(sel) sel.value = lang === 'hi' ? 'hi' : 'en';
+  applyTranslations();
+  // Animate transition
+  const phone = document.getElementById('phone');
+  phone.style.opacity='0.85';
+  setTimeout(()=>phone.style.opacity='1',200);
+  phone.style.transition='opacity 0.2s';
+}
+
+function onLangSelectChange() {
+  const sel = document.getElementById('e-lang');
+  if(sel && (sel.value === 'hi' || sel.value === 'en')) setLang(sel.value);
+}
+
+// ═══════════════════════════════════════════════════════
+// WASTE DATA
+// ═══════════════════════════════════════════════════════
+const wasteData = {
+  en: {
+    solid:{ title:'🗑️ Household / Solid Waste', desc:'Segregate into DRY (paper, plastic, metal, glass) and WET (food scraps, kitchen waste). Dry goes to your kabadiwala for cash. Wet is composted or picked up in the morning green MCD vehicle. Never mix — mixing reduces recyclability and the rate you get.', steps:['Separate dry and wet waste in different bins','Dry waste: call a kabadiwala from the Collectors tab','Wet waste: place outside before 7 AM for MCD pickup','Hazardous items (batteries, bulbs): drop at e-waste centre'], action:'Find Kabadiwala Nearby', goto:'collectors', filter:'kabadi' },
+    ewaste:{ title:'💻 E-Waste / Electronics', desc:"Electronics contain lead, cadmium, and mercury. Never throw in regular bins — it's illegal under E-Waste Rules 2022. You can get ₹60–₹800 per device.", steps:['Laptops, phones, TVs: sell to certified e-waste collector','Batteries: drop at any authorised collection point','Bulk disposal: use CPCB-registered recycler'], action:'Find E-Waste Collector', goto:'collectors', filter:'ewaste' },
+    construction:{ title:'🧱 Construction & Debris', desc:'Concrete, tiles, bricks and rubble cannot go in regular bins. Under MCD C&D Waste Rules, generating more than 200 kg requires a formal disposal plan. Fines up to ₹50,000 for illegal dumping.', steps:['Estimate quantity (each truck holds ~3–5 tonnes)','Hire licensed hauler from Collectors tab','Obtain MCD disposal receipt — keep it for records'], action:'Find Debris Hauler', goto:'collectors', filter:'cd' },
+    biomedical:{ title:'🧪 Biomedical / Clinical Waste', desc:'Used syringes, expired medicines, bandages, and lab materials are biomedical waste. Illegal to dispose of in regular bins under Biomedical Waste Management Rules 2016.', steps:['DO NOT put in regular garbage — criminal offence','Home care: use dedicated biomedical pickup service','Clinics: contact CPCB-licensed handler from Collectors tab','Medicines: return to pharmacy for safe disposal'], action:'Contact Licensed Handler', goto:'collectors', filter:'bio' },
+    religious:{ title:'🪔 Religious / Festival Waste', desc:'Flowers, agarbatti ash, pooja material, and idols should go to designated nirmalya collection points, not rivers or drains. Most MCDs now have green nirmalya bins near temples.', steps:['Flowers & garlands: use nirmalya bins at temples / ghats','Idols: use MCD immersion tanks (not rivers)','Diwali: dry waste crackers go in regular dry bin'], action:'Find Nirmalya Drop Point', goto:'collectors', filter:'kabadi' },
+    liquid:{ title:'🛢️ Liquid / Oil / Chemical', desc:'Cooking oil, motor oil, solvents, and paints cannot be poured down drains — they contaminate groundwater. Contact your local PCB for certified disposal.', steps:['Store in sealed containers — never pour down drains','Cooking oil: many NGOs collect for biodiesel','Motor oil / chemicals: contact SPCB-authorised collector'], action:'Report Illegal Dumping', goto:'report' },
+    scrap:{ title:'📦 Scrap & Metal Waste', desc:'Your kabadiwala will buy paper, metal, plastic, glass, and electrical wire. Check the Rates tab for fair prices. Enrolled collectors agree to standard rates.', steps:['Check current rates in the Rates tab','Call an enrolled kabadiwala — they come to you','Weigh items together — ask for a receipt'], action:"Check Today's Rates", goto:'rates' },
+    animal:{ title:'🐕 Animal Carcass', desc:'A dead animal is a public health emergency. Must be removed within 4 hours under municipal regulations. Do NOT touch without gloves — risk of disease.', steps:['Do not touch the animal — risk of rabies and infection','Use the Report tab — marks as "High / Urgent"','Municipality response SLA: 4 hours','If no response in 2 hours, escalate to ward councillor'], action:'🚨 File Emergency Report', goto:'report', urgent:true },
+    garden:{ title:'🌿 Garden / Wet / Organic Waste', desc:'Garden trimmings, leaves, vegetable peels, and organic kitchen waste can be composted into fertiliser. Many MCDs provide compost bins for free.', steps:['Compost at home: MCD provides free bins on request','Bulk garden waste: contact municipal green waste pickup','Societies: collective composting saves on waste charges'], action:'Find Compost Drop Point', goto:'collectors', filter:'kabadi' }
+  },
+  hi: {
+    solid:{ title:'🗑️ घरेलू / ठोस कचरा', desc:'सूखे (कागज, प्लास्टिक, धातु) और गीले (खाना, रसोई) कचरे को अलग करें। सूखा कबाड़ी को दें — पैसे मिलेंगे। गीला MCD की हरी गाड़ी में जाता है। कभी मिलाएं नहीं।', steps:['सूखा और गीला कचरा अलग-अलग डिब्बों में रखें','सूखा कचरा: संग्रहक टैब से कबाड़ी बुलाएं','गीला कचरा: सुबह 7 बजे से पहले बाहर रखें','खतरनाक सामान (बैटरी, बल्ब): ई-वेस्ट केंद्र पर छोड़ें'], action:'पास का कबाड़ी खोजें', goto:'collectors', filter:'kabadi' },
+    ewaste:{ title:'💻 ई-वेस्ट / इलेक्ट्रॉनिक्स', desc:'इलेक्ट्रॉनिक्स में सीसा, कैडमियम और पारा होता है। नियमित डिब्बे में न फेंकें — ई-वेस्ट नियम 2022 के तहत अवैध है। प्रति उपकरण ₹60–₹800 मिल सकते हैं।', steps:['लैपटॉप, फोन, TV: प्रमाणित ई-वेस्ट संग्रहक को दें','बैटरी: अधिकृत संग्रह केंद्र पर जमा करें','बड़ी मात्रा: CPCB-पंजीकृत रीसाइकलर का उपयोग करें'], action:'ई-वेस्ट संग्रहक खोजें', goto:'collectors', filter:'ewaste' },
+    construction:{ title:'🧱 निर्माण और मलबा', desc:'कंक्रीट, टाइलें और ईंटें नियमित डिब्बों में नहीं जा सकतीं। MCD नियमों के तहत 200 kg से अधिक के लिए औपचारिक योजना जरूरी है। अवैध डंपिंग पर ₹50,000 जुर्माना।', steps:['मात्रा का अनुमान लगाएं (हर ट्रक ~3–5 टन)','संग्रहक टैब से लाइसेंसी हॉलर किराए पर लें','MCD रसीद लें — रिकॉर्ड के लिए रखें'], action:'मलबा हॉलर खोजें', goto:'collectors', filter:'cd' },
+    biomedical:{ title:'🧪 बायोमेडिकल कचरा', desc:'इस्तेमाल की सुइयां, दवाएं, पट्टियां बायोमेडिकल कचरा हैं। इन्हें नियमित डिब्बे में फेंकना बायोमेडिकल वेस्ट नियम 2016 के तहत अपराध है।', steps:['नियमित कचरे में न डालें — आपराधिक अपराध है','घरेलू देखभाल: विशेष पिकअप सेवा का उपयोग करें','क्लीनिक: CPCB-लाइसेंसी संग्रहक से संपर्क करें','दवाएं: सुरक्षित निपटान के लिए फार्मेसी वापस करें'], action:'लाइसेंसी संग्रहक से संपर्क करें', goto:'collectors', filter:'bio' },
+    religious:{ title:'🪔 धार्मिक / त्योहारी कचरा', desc:'फूल, अगरबत्ती राख, पूजा सामग्री निर्माल्य संग्रह केंद्रों पर जाएं — नदियों या नालियों में नहीं। अधिकांश MCD में अब मंदिरों के पास हरे निर्माल्य डिब्बे हैं।', steps:['फूल और माला: मंदिर / घाट पर निर्माल्य डिब्बे','मूर्तियां: MCD इमर्शन टैंक (नदी नहीं)','दीवाली: सूखे पटाखे नियमित सूखे डिब्बे में'], action:'निर्माल्य संग्रह स्थान खोजें', goto:'collectors', filter:'kabadi' },
+    liquid:{ title:'🛢️ तरल / तेल / रासायनिक', desc:'खाना पकाने का तेल, मोटर ऑयल, सॉल्वेंट नालियों में न बहाएं — भूजल प्रदूषित होता है। प्रमाणित निपटान के लिए स्थानीय PCB से संपर्क करें।', steps:['सीलबंद डिब्बों में रखें — नाली में कभी न डालें','खाना पकाने का तेल: NGO बायोडीजल के लिए एकत्र करते हैं','मोटर ऑयल: SPCB-अधिकृत संग्रहक से संपर्क करें'], action:'अवैध डंपिंग रिपोर्ट करें', goto:'report' },
+    scrap:{ title:'📦 रद्दी और धातु', desc:'कबाड़ी कागज, धातु, प्लास्टिक, कांच खरीदेगा। दरें टैब में उचित मूल्य देखें। SwachhConnect के संग्रहक मानक दरों पर सहमत हैं।', steps:['दरें टैब में वर्तमान भाव देखें','नामांकित कबाड़ी को बुलाएं — वह आपके पास आएगा','साथ में तौलें — रसीद मांगें'], action:'आज की दरें देखें', goto:'rates' },
+    animal:{ title:'🐕 मृत पशु', desc:'मृत पशु सार्वजनिक स्वास्थ्य आपातकाल है। नगर पालिका नियमों के तहत 4 घंटे में हटाना जरूरी। दस्ताने के बिना न छुएं — बीमारी का खतरा।', steps:['पशु को न छुएं — रेबीज और संक्रमण का खतरा','रिपोर्ट टैब का उपयोग करें — "अधिक / तत्काल" चुनें','नगर पालिका प्रतिक्रिया SLA: 4 घंटे','2 घंटे में जवाब न मिले तो वार्ड पार्षद को बताएं'], action:'🚨 आपातकालीन रिपोर्ट करें', goto:'report', urgent:true },
+    garden:{ title:'🌿 बगीचा / गीला / जैविक', desc:'बगीचे की कटाई, पत्तियां, सब्जी के छिलके खाद बन सकते हैं। कई MCD मुफ्त में कंपोस्ट डिब्बे देती है।', steps:['घर पर कंपोस्ट: MCD अनुरोध पर मुफ्त डिब्बे देती है','बड़ी मात्रा: नगर निगम हरित कचरा पिकअप','सोसाइटी: सामूहिक कंपोस्टिंग से खर्च बचता है'], action:'कंपोस्ट केंद्र खोजें', goto:'collectors', filter:'kabadi' }
+  }
+};
+
+const wasteTileOrder = ['solid','ewaste','construction','biomedical','religious','liquid','scrap','animal','garden'];
+
+function renderWasteGrid() {
+  const grid = document.getElementById('waste-grid');
+  if (!grid) return;
+  grid.innerHTML = wasteTileOrder.map(key => {
+    return `<div class="waste-tile" onclick="showInfo('${key}')">
+      <span class="waste-tile-icon">${{solid:'🗑️',ewaste:'💻',construction:'🧱',biomedical:'🧪',religious:'🪔',liquid:'🛢️',scrap:'📦',animal:'🐕',garden:'🌿'}[key]}</span>
+      <div class="waste-tile-label">${T('wt_'+key+'_lbl')}</div>
+      <div class="waste-tile-sub">${T('wt_'+key+'_sub')}</div>
+    </div>`;
+  }).join('');
+}
+
+function showInfo(key) {
+  const d = (wasteData[currentLang] || wasteData.en)[key];
+  if (!d) return;
+  document.querySelectorAll('.waste-tile').forEach(t=>t.classList.remove('selected'));
+  // find and select clicked tile
+  const tiles = document.querySelectorAll('.waste-tile');
+  const idx = wasteTileOrder.indexOf(key);
+  if (tiles[idx]) tiles[idx].classList.add('selected');
+  document.getElementById('info-title').textContent = d.title;
+  document.getElementById('info-desc').textContent = d.desc;
+  document.getElementById('info-steps').innerHTML = d.steps.map((s,i)=>
+    `<div class="info-step"><div class="info-step-dot">${i+1}</div><div class="info-step-text">${s}</div></div>`
+  ).join('');
+  const btnStyle = d.urgent ? 'style="background:#DC2626;"':'';
+  const filterArg = d.filter ? `,'${d.filter}'` : '';
+  document.getElementById('info-action').innerHTML =
+    `<button class="btn-primary" ${btnStyle} onclick="showScreen('${d.goto}'${filterArg})">${d.action}</button>`;
+  const panel = document.getElementById('info-panel');
+  panel.classList.add('visible');
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeInfo() {
+  document.getElementById('info-panel').classList.remove('visible');
+  document.querySelectorAll('.waste-tile').forEach(t=>t.classList.remove('selected'));
+}
+
+// ═══════════════════════════════════════════════════════
+// COLLECTORS
+// ═══════════════════════════════════════════════════════
+const collectors = [
+  {id:1,name:'Ramesh Mishra',initials:'RM',type_en:'Kabadiwala · Dry scrap specialist',type_hi:'कबाड़ी · सूखी रद्दी विशेषज्ञ',distance:'0.4 km',rating:4.8,reviews:127,pickups:340,since:'2019',categories:['kabadi'],color:'#DCFCE7',textColor:'#15803D',borderColor:'#86EFAC',badges:[{label:'✓ Verified',labelHi:'✓ सत्यापित',cls:'badge-green'},{label:'Paper',labelHi:'कागज',cls:'badge-blue'},{label:'Metal',labelHi:'धातु',cls:'badge-blue'},{label:'Plastic',labelHi:'प्लास्टिक',cls:'badge-blue'}],rates:[['Newspaper / अखबार','₹12/kg'],['Iron scrap / लोहा','₹32/kg'],['PET bottles / बोतल','₹18/kg']]},
+  {id:2,name:'Sunita Kumari',initials:'SK',type_en:'SHG Collective · Ragpicker',type_hi:'SHG सामूहिक · कूड़ा बीनने वाली',distance:'0.9 km',rating:4.6,reviews:89,pickups:210,since:'2021',categories:['kabadi','ewaste'],color:'#DBEAFE',textColor:'#1D4ED8',borderColor:'#93C5FD',badges:[{label:'🏛 Govt. Enrolled',labelHi:'🏛 सरकारी नामांकित',cls:'badge-blue'},{label:'E-Waste Cert.',labelHi:'ई-वेस्ट प्रमाणित',cls:'badge-amber'}],rates:[['Cardboard / गत्ता','₹8/kg'],['Laptop / लैपटॉप','₹400/unit'],['Mobile / मोबाइल','₹80/unit']]},
+  {id:3,name:'Abdul Matin & Sons',initials:'AM',type_en:'Construction waste hauler',type_hi:'निर्माण कचरा हॉलर',distance:'1.2 km',rating:4.5,reviews:54,pickups:89,since:'2020',categories:['cd'],color:'#FEF3C7',textColor:'#B45309',borderColor:'#FCD34D',badges:[{label:'C&D Debris',labelHi:'निर्माण मलबा',cls:'badge-amber'},{label:'Licensed',labelHi:'लाइसेंसी',cls:'badge-amber'}],rates:[['Debris per trip','₹1,800'],['Tiles & rubble','₹1,500'],['Soil disposal','₹2,000']]},
+  {id:4,name:'BioWaste Handlers Ltd.',initials:'BW',type_en:'CPCB-Licensed · Biomedical & Hazardous',type_hi:'CPCB-लाइसेंसी · बायोमेडिकल',distance:'2.1 km',rating:4.9,reviews:203,pickups:1200,since:'2017',categories:['bio'],color:'#FEE2E2',textColor:'#B91C1C',borderColor:'#FCA5A5',badges:[{label:'🔴 CPCB Licensed',labelHi:'🔴 CPCB लाइसेंसी',cls:'badge-red'},{label:'Biomedical',labelHi:'बायोमेडिकल',cls:'badge-red'},{label:'E-Waste Auth.',labelHi:'ई-वेस्ट अधिकृत',cls:'badge-amber'}],rates:[['Clinic pickup / क्लीनिक','₹800/visit'],['Hospital contract','Custom'],['Home care / घरेलू','₹250/pickup']]}
+];
+
+let currentFilter = 'all';
+function filterCollectors(cat, el) {
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter = cat;
+  renderCollectors(cat);
+}
+function renderCollectors(cat) {
+  const list = document.getElementById('collectors-list');
+  const filtered = cat==='all' ? collectors : collectors.filter(c=>c.categories.includes(cat));
+  const hi = currentLang==='hi';
+  list.innerHTML = filtered.map(c=>`
+    <div class="collector-card" onclick="showCollectorDetail(${c.id})">
+      <div class="collector-top">
+        <div class="avatar" style="background:${c.color};color:${c.textColor};border-color:${c.borderColor}">${c.initials}</div>
+        <div class="collector-info">
+          <div class="collector-name">${c.name}</div>
+          <div class="collector-type">${hi ? c.type_hi : c.type_en}</div>
+          <div class="badges">${c.badges.map(b=>`<span class="badge ${b.cls}">${hi&&b.labelHi?b.labelHi:b.label}</span>`).join('')}</div>
+        </div>
+        <div class="collector-right">
+          <div class="distance">${c.distance}</div>
+          <div class="stars">★★★★★ <span class="rating-num">${c.rating}</span></div>
+        </div>
+      </div>
+      <div class="collector-bottom">
+        <button class="action-btn action-call" onclick="event.stopPropagation();showToast(T('calling_t'),'${c.name} · '+T('calling_b_pfx'))">${T('call_lbl')}</button>
+        <button class="action-btn action-wa" onclick="event.stopPropagation();showToast(T('wa_t'),T('wa_b_pfx')+' ${c.name}')">${T('wa_lbl')}</button>
+      </div>
+    </div>`).join('');
+}
+function showCollectorDetail(id) {
+  const c = collectors.find(x=>x.id===id);
+  if(!c) return;
+  const hi = currentLang==='hi';
+  document.getElementById('detail-content').innerHTML = `
+    <div class="detail-header">
+      <div class="detail-avatar" style="background:${c.color};color:${c.textColor};border-color:${c.borderColor}">${c.initials}</div>
+      <div class="detail-name">${c.name}</div>
+      <div class="detail-type">${hi?c.type_hi:c.type_en}</div>
+      <div class="badges" style="justify-content:center;margin-top:8px">${c.badges.map(b=>`<span class="badge ${b.cls}">${hi&&b.labelHi?b.labelHi:b.label}</span>`).join('')}</div>
+    </div>
+    <div class="detail-stats">
+      <div class="detail-stat"><div class="stat-val">${c.rating}</div><div class="stat-label">${T('stat_rating')}</div></div>
+      <div class="detail-stat"><div class="stat-val">${c.reviews}</div><div class="stat-label">${T('stat_reviews')}</div></div>
+      <div class="detail-stat"><div class="stat-val">${c.pickups}</div><div class="stat-label">${T('stat_pickups')}</div></div>
+      <div class="detail-stat"><div class="stat-val">${c.since}</div><div class="stat-label">${T('stat_since')}</div></div>
+    </div>
+    <div class="detail-rates">
+      <div class="dr-title">${T('cur_rates')}</div>
+      ${c.rates.map(r=>`<div class="dr-row"><span class="dr-item">${r[0]}</span><span class="dr-price">${r[1]}</span></div>`).join('')}
+    </div>
+    <button class="btn-primary" onclick="showToast(T('calling_t'),'${c.name}');closeModal('detail-modal')">${T('call_now')}</button>
+    <button class="btn-secondary" onclick="closeModal('detail-modal')">${T('close_btn')}</button>`;
+  document.getElementById('detail-modal').classList.add('show');
+}
+
+// ═══════════════════════════════════════════════════════
+// RATES
+// ═══════════════════════════════════════════════════════
+const ratesData = {
+  Delhi:[
+    {section:{en:'Paper & Cardboard',hi:'कागज और गत्ता'},items:[{icon:'📰',name:{en:'Newspaper',hi:'अखबार'},grade:{en:'Clean, dry',hi:'साफ, सूखा'},price:'₹12/kg',trend:'up'},{icon:'📦',name:{en:'Cardboard',hi:'गत्ता'},grade:{en:'Corrugated',hi:'नालीदार'},price:'₹8/kg',trend:'flat'},{icon:'📄',name:{en:'White office paper',hi:'सफेद कार्यालय कागज'},grade:{en:'A4, unsoiled',hi:'A4, साफ'},price:'₹14/kg',trend:'up'},{icon:'📚',name:{en:'Books / magazines',hi:'किताबें / पत्रिकाएं'},grade:{en:'Any condition',hi:'किसी भी स्थिति में'},price:'₹6/kg',trend:'dn'}]},
+    {section:{en:'Metals',hi:'धातुएं'},items:[{icon:'⚙️',name:{en:'Iron / Steel',hi:'लोहा / स्टील'},grade:{en:'Scrap pieces',hi:'टुकड़े'},price:'₹32/kg',trend:'up'},{icon:'🔧',name:{en:'Aluminium',hi:'एल्युमीनियम'},grade:{en:'Sheets or castings',hi:'चादर या ढलाई'},price:'₹90/kg',trend:'dn'},{icon:'🔌',name:{en:'Copper wire',hi:'तांबे का तार'},grade:{en:'Uninsulated',hi:'बिना इन्सुलेशन'},price:'₹420/kg',trend:'up'},{icon:'🏺',name:{en:'Brass',hi:'पीतल'},grade:{en:'Any',hi:'कोई भी'},price:'₹250/kg',trend:'flat'},{icon:'🥫',name:{en:'Steel cans',hi:'स्टील के डिब्बे'},grade:{en:'Crushed',hi:'चपटे'},price:'₹18/kg',trend:'flat'}]},
+    {section:{en:'Plastic',hi:'प्लास्टिक'},items:[{icon:'🍶',name:{en:'PET bottles',hi:'PET बोतलें'},grade:{en:'Clean, labels off',hi:'साफ, लेबल हटाकर'},price:'₹18/kg',trend:'up'},{icon:'🪣',name:{en:'Hard plastic (HDPE)',hi:'कड़ा प्लास्टिक'},grade:{en:'Buckets, crates',hi:'बाल्टी, क्रेट'},price:'₹10/kg',trend:'dn'},{icon:'🛍️',name:{en:'Polythene / carry bags',hi:'पॉलीथीन / थैले'},grade:{en:'Dry only',hi:'केवल सूखे'},price:'₹5/kg',trend:'dn'}]},
+    {section:{en:'Electronics',hi:'इलेक्ट्रॉनिक्स'},items:[{icon:'📱',name:{en:'Mobile phone',hi:'मोबाइल फोन'},grade:{en:'Any condition',hi:'किसी भी हालत में'},price:'₹60–200/unit',trend:'up'},{icon:'💻',name:{en:'Laptop / desktop',hi:'लैपटॉप / डेस्कटॉप'},grade:{en:'Working or not',hi:'चले या न चले'},price:'₹300–800/unit',trend:'up'},{icon:'📺',name:{en:'CRT monitor',hi:'CRT मॉनिटर'},grade:{en:'Any',hi:'कोई भी'},price:'₹4/unit',trend:'dn'}]}
+  ],
+  Mumbai:[
+    {section:{en:'Paper & Cardboard',hi:'कागज और गत्ता'},items:[{icon:'📰',name:{en:'Newspaper',hi:'अखबार'},grade:{en:'Clean, dry',hi:'साफ, सूखा'},price:'₹13/kg',trend:'up'},{icon:'📦',name:{en:'Cardboard',hi:'गत्ता'},grade:{en:'Corrugated',hi:'नालीदार'},price:'₹9/kg',trend:'flat'}]},
+    {section:{en:'Metals',hi:'धातुएं'},items:[{icon:'⚙️',name:{en:'Iron / Steel',hi:'लोहा'},grade:{en:'Scrap',hi:'टुकड़े'},price:'₹34/kg',trend:'up'},{icon:'🔌',name:{en:'Copper wire',hi:'तांबे का तार'},grade:{en:'Uninsulated',hi:'बिना इन्सुलेशन'},price:'₹440/kg',trend:'up'}]}
+  ],
+  Bengaluru:[
+    {section:{en:'Paper & Cardboard',hi:'कागज और गत्ता'},items:[{icon:'📰',name:{en:'Newspaper',hi:'अखबार'},grade:{en:'Clean, dry',hi:'साफ, सूखा'},price:'₹11/kg',trend:'flat'}]},
+    {section:{en:'Metals',hi:'धातुएं'},items:[{icon:'⚙️',name:{en:'Iron / Steel',hi:'लोहा'},grade:{en:'Scrap',hi:'टुकड़े'},price:'₹31/kg',trend:'flat'},{icon:'🔧',name:{en:'Aluminium',hi:'एल्युमीनियम'},grade:{en:'Sheets',hi:'चादर'},price:'₹88/kg',trend:'dn'}]}
+  ],
+  Chennai:[
+    {section:{en:'Paper & Cardboard',hi:'कागज और गत्ता'},items:[{icon:'📰',name:{en:'Newspaper',hi:'अखबार'},grade:{en:'Clean, dry',hi:'साफ, सूखा'},price:'₹10/kg',trend:'dn'}]},
+    {section:{en:'Metals',hi:'धातुएं'},items:[{icon:'⚙️',name:{en:'Iron / Steel',hi:'लोहा'},grade:{en:'Scrap',hi:'टुकड़े'},price:'₹30/kg',trend:'flat'},{icon:'🔌',name:{en:'Copper wire',hi:'तांबे का तार'},grade:{en:'Uninsulated',hi:'बिना इन्सुलेशन'},price:'₹410/kg',trend:'dn'}]}
+  ]
+};
+let currentCity = 'Delhi';
+function setCity(city, el) {
+  document.querySelectorAll('.city-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  currentCity = city;
+  renderRates(city);
+}
+function renderRates(city) {
+  const data = ratesData[city] || ratesData.Delhi;
+  const hi = currentLang==='hi';
+  const ts = {up:`<span class="rate-trend trend-up">↑</span>`,dn:`<span class="rate-trend trend-dn">↓</span>`,flat:`<span class="rate-trend trend-flat">→</span>`};
+  document.getElementById('rates-content').innerHTML = data.map(sec=>`
+    <div class="rate-section">
+      <div class="rate-section-title">${hi?sec.section.hi:sec.section.en}</div>
+      ${sec.items.map(item=>`
+        <div class="rate-row">
+          <div class="rate-icon">${item.icon}</div>
+          <div class="rate-name-col"><div class="rate-item">${hi?item.name.hi:item.name.en}</div><div class="rate-grade">${hi?item.grade.hi:item.grade.en}</div></div>
+          <div class="rate-right"><div class="rate-price">${item.price} ${ts[item.trend]}</div></div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// SCREENS
+// ═══════════════════════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='collectors') renderCollectors(currentFilter||'all');
+  if(name==='rates') renderRates(currentCity||'Delhi');
+}
+
+// ═══════════════════════════════════════════════════════
+// ENROLLMENT
+// ═══════════════════════════════════════════════════════
+let enrollStep=1, selectedWaste=new Set();
+function openEnrollForm() {
+  document.getElementById('enroll-hero').style.display='none';
+  document.getElementById('enroll-form-wrap').classList.add('open');
+  enrollStep=1; showEnrollStep(1);
+  setTimeout(()=>document.getElementById('enroll-form-wrap').scrollIntoView({behavior:'smooth',block:'start'}),100);
+}
+function closeEnrollForm() {
+  document.getElementById('enroll-hero').style.display='block';
+  document.getElementById('enroll-form-wrap').classList.remove('open');
+  resetEnrollForm();
+}
+function closeEnrollAfterSuccess() {
+  document.getElementById('enroll-form-wrap').classList.remove('open');
+  document.getElementById('enroll-hero').style.display='none';
+  const enrolled=document.createElement('div');
+  enrolled.style.cssText='margin:14px 16px 0;background:var(--green);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);';
+  enrolled.innerHTML=`<span style="font-size:24px">✅</span><div><div style="font-size:13px;font-weight:700;color:white">${currentLang==='hi'?'आप SwachhConnect पर लाइव हैं!':'You\'re live on SwachhConnect!'}</div><div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:2px">Collector ID: SC-GR-00847</div></div>`;
+  document.getElementById('enroll-hero').parentNode.insertBefore(enrolled,document.getElementById('enroll-hero'));
+  resetEnrollForm();
+}
+function resetEnrollForm() {
+  enrollStep=1; selectedWaste.clear();
+  ['e-phone','e-name','e-aadhaar','e-area'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  for(let i=0;i<6;i++){const o=document.getElementById('otp'+i);if(o)o.value='';}
+  document.querySelectorAll('.ws-tile').forEach(t=>t.classList.remove('sel'));
+  document.getElementById('enroll-success').classList.remove('show');
+  document.querySelectorAll('.enroll-step-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('estep-1').classList.add('active');
+  updateProgress(1);
+}
+function showEnrollStep(n) {
+  document.querySelectorAll('.enroll-step-panel').forEach(p=>p.classList.remove('active'));
+  const p=document.getElementById('estep-'+n);if(p)p.classList.add('active');
+  updateProgress(n); enrollStep=n;
+}
+function updateProgress(active) {
+  for(let i=1;i<=5;i++){
+    const step=document.getElementById('prog-'+i);
+    const dot=step.querySelector('.prog-dot');
+    step.classList.remove('active','done');
+    if(i<active){step.classList.add('done');dot.textContent='✓';}
+    else if(i===active){step.classList.add('active');dot.textContent=i;}
+    else{dot.textContent=i;}
+    if(i<5){const line=document.getElementById('pline-'+i);if(line)line.classList.toggle('done',i<active);}
+  }
+}
+function goStep(n) {
+  if(n===2){
+    const phone=document.getElementById('e-phone').value.replace(/\s/g,'');
+    const name=document.getElementById('e-name').value.trim();
+    if(phone.length<10||!name)return;
+    document.getElementById('otp-desc').textContent=T('otp_desc').replace('your number',`+91 ${phone.slice(0,5)}XXXXX`);
+    showToast(T('es2_title'),currentLang==='hi'?'डेमो OTP: 1 2 3 4 5 6':'Demo OTP: 1 2 3 4 5 6');
+  }
+  showEnrollStep(n);
+  document.getElementById('enroll-form-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function checkPhoneStep(){
+  const phone=(document.getElementById('e-phone').value||'').replace(/\s/g,'');
+  const name=(document.getElementById('e-name').value||'').trim();
+  document.getElementById('btn-step1').disabled=!(phone.length===10&&name.length>1);
+}
+function otpNext(el,idx){
+  el.value=el.value.replace(/[^0-9]/g,'').slice(-1);
+  if(el.value&&idx<5)document.getElementById('otp'+(idx+1)).focus();
+  const vals=[0,1,2,3,4,5].map(i=>document.getElementById('otp'+i).value);
+  const full=vals.every(v=>v!=='');
+  document.getElementById('btn-step2').disabled=!full;
+  if(full&&vals.join('')==='123456')setTimeout(()=>goStep(3),300);
+}
+function fmtAadhaar(el){
+  let v=el.value.replace(/\D/g,'');
+  if(v.length>4)v=v.slice(0,4)+' '+v.slice(4);
+  if(v.length>9)v=v.slice(0,9)+' '+v.slice(9);
+  el.value=v.slice(0,14);
+}
+function checkKycStep(){
+  const a=(document.getElementById('e-aadhaar').value||'').replace(/\s/g,'');
+  document.getElementById('btn-step3').disabled=a.length<12;
+  if(a.length===12)setTimeout(()=>showToast(T('kyc_ready_t'),T('kyc_ready_b')),200);
+}
+function toggleWaste(el,cat){
+  el.classList.toggle('sel');
+  if(el.classList.contains('sel'))selectedWaste.add(cat);else selectedWaste.delete(cat);
+  checkServicesStep();
+}
+function checkServicesStep(){
+  const area=(document.getElementById('e-area')?document.getElementById('e-area').value:'').trim();
+  document.getElementById('btn-step4').disabled=!(selectedWaste.size>0&&area.length>2);
+}
+function finishEnrollment(){
+  document.querySelectorAll('.enroll-step-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('enroll-success').classList.add('show');
+  document.getElementById('enroll-id').textContent='SC-GR-0'+Math.floor(800+Math.random()*200);
+  updateProgress(6);
+}
+
+// ═══════════════════════════════════════════════════════
+// REPORT
+// ═══════════════════════════════════════════════════════
+let selectedType=null;
+function selectType(el,type){
+  document.querySelectorAll('.type-chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected'); selectedType=type;
+}
+function setSev(el){
+  document.querySelectorAll('.sev-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+function useGPS(){
+  document.getElementById('loc-input').value=T('gps_loc');
+  showToast(T('gps_toast_t'),T('gps_toast_b'));
+}
+function setUrgent(){
+  setTimeout(()=>{
+    const chips=document.querySelectorAll('.type-chip.urgent');
+    if(chips[0])chips[0].click();
+    document.querySelectorAll('.sev-btn').forEach(b=>b.classList.remove('active'));
+    const sevs=document.querySelectorAll('.sev-btn');
+    if(sevs[2])sevs[2].classList.add('active');
+  },100);
+}
+function resetReport(){
+  document.getElementById('success-overlay').classList.remove('show');
+  document.querySelectorAll('.type-chip').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.sev-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.sev-med').classList.add('active');
+  document.getElementById('loc-input').value='';
+  document.getElementById('report-desc').value='';
+  showScreen('home');
+}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+let toastTimer;
+function showToast(title,body){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-title').textContent=title;
+  document.getElementById('toast-body').textContent=body;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ═══════════════════════════════════════════════════════
+// PHASE 2 — ULB DASHBOARD
+// ═══════════════════════════════════════════════════════
+const tickets = [
+  {id:'DL-2026-04912',type_en:'Dead Animal',type_hi:'मृत पशु',loc_en:'Near M3M Gate 2, Sector 67',loc_hi:'M3M गेट 2, सेक्टर 67 के पास',ward:'12',time:'12 min ago',status:'urgent',assigned_en:'Unassigned',assigned_hi:'असाइन नहीं'},
+  {id:'DL-2026-04908',type_en:'Illegal Dumping',type_hi:'अवैध डंपिंग',loc_en:'Near Sector 67 HUDA Metro Station',loc_hi:'सेक्टर 67 HUDA मेट्रो स्टेशन के पास',ward:'12',time:'34 min ago',status:'inprogress',assigned_en:'Team A · Field',assigned_hi:'टीम A · फील्ड'},
+  {id:'DL-2026-04901',type_en:'Open Garbage',type_hi:'खुला कचरा',loc_en:'Southern Periphery Road, Sector 67',loc_hi:'साउदर्न पेरिफेरी रोड, सेक्टर 67',ward:'12',time:'1 hr ago',status:'open',assigned_en:'Unassigned',assigned_hi:'असाइन नहीं'},
+  {id:'DL-2026-04895',type_en:'Hospital Waste',type_hi:'अस्पताल कचरा',loc_en:'Opp. Medanta OPD, Sector 38',loc_hi:'मेदांता OPD के सामने, सेक्टर 38',ward:'13',time:'2 hrs ago',status:'inprogress',assigned_en:'BioWaste Ltd.',assigned_hi:'बायोवेस्ट लि.'},
+  {id:'DL-2026-04887',type_en:'Debris on Road',type_hi:'मलबा',loc_en:'New Construction Site, Sector 68',loc_hi:'नया निर्माण स्थल, सेक्टर 68',ward:'13',time:'3 hrs ago',status:'resolved',assigned_en:'Abdul Matin & Sons',assigned_hi:'अब्दुल मतीन'},
+  {id:'DL-2026-04881',type_en:'Chemical Spill',type_hi:'रासायनिक रिसाव',loc_en:'IMT Manesar, Block F',loc_hi:'IMT मानेसर, ब्लॉक F',ward:'14',time:'5 hrs ago',status:'resolved',assigned_en:'Hazmat Team B',assigned_hi:'हैजमैट टीम B'},
+];
+const statusLabelEn = {urgent:'Urgent',inprogress:'In Progress',open:'Open',resolved:'Resolved'};
+const statusLabelHi = {urgent:'तत्काल',inprogress:'प्रगति में',open:'खुला',resolved:'हल हुआ'};
+const statusCls = {urgent:'status-urgent',inprogress:'status-inprogress',open:'status-open',resolved:'status-resolved'};
+const dotCls = {urgent:'urgent',inprogress:'inprogress',open:'open',resolved:'resolved'};
+
+let currentWard = '12';
+function setWard(w, el) {
+  document.querySelectorAll('.ward-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  currentWard = w;
+  renderTickets();
+}
+function renderTickets() {
+  const hi = currentLang==='hi';
+  const filtered = tickets.filter(t=>t.ward===currentWard);
+  const list = document.getElementById('ticket-list');
+  if(!list) return;
+  list.innerHTML = filtered.map(t=>`
+    <div class="ticket-item" onclick="showToast('${hi?t.type_hi:t.type_en}','${hi?t.loc_hi:t.loc_en} · ${t.id}')">
+      <div class="ticket-dot ${dotCls[t.status]}"></div>
+      <div class="ticket-body">
+        <div class="ticket-title">${hi?t.type_hi:t.type_en}</div>
+        <div class="ticket-meta">${hi?t.loc_hi:t.loc_en} · ${hi?t.assigned_hi:t.assigned_en}</div>
+        <div class="ticket-meta" style="font-family:var(--font-mono);font-size:10px;color:var(--ink-4)">${t.id}</div>
+      </div>
+      <div class="ticket-right">
+        <div class="ticket-time">${t.time}</div>
+        <div class="ticket-status ${statusCls[t.status]}">${hi?statusLabelHi[t.status]:statusLabelEn[t.status]}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderULBChart() {
+  const el = document.getElementById('ulb-bar-chart');
+  if(!el) return;
+  const hi = currentLang==='hi';
+  const days = hi
+    ? ['सोम','मंगल','बुध','गुरु','शुक्र','शनि','रवि']
+    : ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const vals = [12,18,9,24,15,31,22];
+  const max = Math.max(...vals);
+  const colors = ['#6D28D9','#7C3AED','#8B5CF6','#A78BFA','#7C3AED','#6D28D9','#8B5CF6'];
+  el.innerHTML = vals.map((v,i)=>`
+    <div class="bar-col">
+      <div class="bar-val">${v}</div>
+      <div class="bar-fill" style="height:${Math.round(v/max*56)}px;background:${colors[i]}"></div>
+      <div class="bar-lbl">${days[i]}</div>
+    </div>`).join('');
+}
+
+function renderSLARows() {
+  const el = document.getElementById('ulb-sla-rows');
+  if(!el) return;
+  const hi = currentLang==='hi';
+  const rows = [
+    {label_en:'Dead Animal',label_hi:'मृत पशु',pct:96,color:'#22C55E'},
+    {label_en:'Hospital Waste',label_hi:'अस्पताल कचरा',pct:100,color:'#6D28D9'},
+    {label_en:'Open Garbage',label_hi:'खुला कचरा',pct:84,color:'#F59E0B'},
+    {label_en:'Debris / C&D',label_hi:'मलबा',pct:72,color:'#EF4444'},
+    {label_en:'Chemical Spill',label_hi:'रासायनिक रिसाव',pct:100,color:'#22C55E'},
+  ];
+  el.innerHTML = rows.map(r=>`
+    <div class="sla-row">
+      <div class="sla-label">${hi?r.label_hi:r.label_en}</div>
+      <div class="sla-bar-wrap"><div class="sla-bar-fill" style="width:${r.pct}%;background:${r.color}"></div></div>
+      <div class="sla-pct" style="color:${r.color}">${r.pct}%</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// PHASE 2 — BIOMEDICAL B2B
+// ═══════════════════════════════════════════════════════
+const bioManifests = [
+  {id:'BWM-2026-0341',facility:'Medanta OPD, Sector 38',type:'Sharps + Infectious',qty:'8.4 kg',status:'disposed',date:'Today 8:00 AM',steps:[true,true,true,true]},
+  {id:'BWM-2026-0339',facility:'Thyrocare Lab, Sector 67',type:'Cytotoxic + Liquid Chem.',qty:'3.1 kg',status:'collected',date:'Today 10:30 AM',steps:[true,true,true,false]},
+  {id:'BWM-2026-0335',facility:'Fortis Memorial, Sector 44',type:'General Clinical',qty:'12.0 kg',status:'pending',date:'Today 2:00 PM',steps:[true,false,false,false]},
+];
+const bioStatusEn = {pending:'Pending',collected:'In Transit',disposed:'Disposed'};
+const bioStatusHi = {pending:'प्रतीक्षा',collected:'ट्रांसिट में',disposed:'निपटाया गया'};
+const bioStatusCls = {pending:'bio-mstatus-pending',collected:'bio-mstatus-collected',disposed:'bio-mstatus-disposed'};
+
+function renderBioManifests() {
+  const el = document.getElementById('bio-manifest-list');
+  if(!el) return;
+  const hi = currentLang==='hi';
+  const trackLabelsEn = ['Requested','Collected','In Transit','Disposed'];
+  const trackLabelsHi = ['अनुरोध','एकत्रित','ट्रांसिट','निपटाया'];
+  el.innerHTML = bioManifests.map(m=>`
+    <div class="bio-manifest">
+      <div class="bio-manifest-header">
+        <div class="bio-manifest-id">${m.id}</div>
+        <div class="bio-manifest-status ${bioStatusCls[m.status]}">${hi?bioStatusHi[m.status]:bioStatusEn[m.status]}</div>
+      </div>
+      <div class="bio-manifest-row"><span class="bio-mrow-lbl">${hi?'सुविधा':'Facility'}</span><span class="bio-mrow-val">${m.facility}</span></div>
+      <div class="bio-manifest-row"><span class="bio-mrow-lbl">${hi?'प्रकार':'Type'}</span><span class="bio-mrow-val">${m.type}</span></div>
+      <div class="bio-manifest-row"><span class="bio-mrow-lbl">${hi?'मात्रा':'Quantity'}</span><span class="bio-mrow-val">${m.qty}</span></div>
+      <div class="bio-manifest-row"><span class="bio-mrow-lbl">${hi?'समय':'Time'}</span><span class="bio-mrow-val">${m.date}</span></div>
+      <div class="bio-track-steps">
+        ${m.steps.map((done,i)=>`
+          <div class="bio-track-step">
+            <div class="bio-track-dot ${done?(i===m.steps.filter(Boolean).length-1&&!m.steps[i+1]?'active':'done'):''}">${done?'✓':i+1}</div>
+            <div class="bio-track-lbl">${hi?trackLabelsHi[i]:trackLabelsEn[i]}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function showBioForm() {
+  document.getElementById('bio-form-wrap').style.display='block';
+  document.getElementById('bio-form-wrap').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function closeBioForm() { document.getElementById('bio-form-wrap').style.display='none'; }
+function submitManifest() {
+  closeBioForm();
+  const id = 'BWM-2026-0' + Math.floor(342 + Math.random()*100);
+  showToast(currentLang==='hi'?'मैनिफेस्ट बनाया':'Manifest Created', id+' · '+( currentLang==='hi'?'BioWaste Handlers Ltd. को भेजा गया':'Sent to BioWaste Handlers Ltd.'));
+  renderBioManifests();
+}
+
+// ═══════════════════════════════════════════════════════
+// PHASE 2 — ANALYTICS
+// ═══════════════════════════════════════════════════════
+let currentATab = 'composition';
+function setATab(tab, el) {
+  document.querySelectorAll('.atab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  currentATab = tab;
+  renderAnalytics();
+}
+
+function renderAnalytics() {
+  const el = document.getElementById('analytics-content');
+  if(!el) return;
+  const hi = currentLang==='hi';
+  if(currentATab === 'composition') {
+    const segments = [
+      {label_en:'Dry Scrap',label_hi:'सूखी रद्दी',pct:38,color:'#6D28D9'},
+      {label_en:'Wet / Organic',label_hi:'गीला / जैविक',pct:24,color:'#059669'},
+      {label_en:'Construction',label_hi:'निर्माण मलबा',pct:18,color:'#D97706'},
+      {label_en:'E-Waste',label_hi:'ई-वेस्ट',pct:11,color:'#2563EB'},
+      {label_en:'Biomedical',label_hi:'बायोमेडिकल',pct:9,color:'#DC2626'},
+    ];
+    // Build SVG donut
+    let offset=0, r=48, cx=60, cy=60, circ=2*Math.PI*r;
+    const paths = segments.map(s=>{
+      const dash=circ*(s.pct/100), gap=circ-dash;
+      const path=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="16" stroke-dasharray="${dash.toFixed(1)} ${gap.toFixed(1)}" stroke-dashoffset="${(-offset).toFixed(1)}" transform="rotate(-90 ${cx} ${cy})"/>`;
+      offset+=dash;
+      return path;
+    }).join('');
+    el.innerHTML = `
+      <div class="analytics-chart">
+        <div class="ac-title">${hi?'कचरे का प्रकार वितरण':'Waste Type Distribution'}</div>
+        <div class="ac-sub">${hi?'दिल्ली NCR · पिछले 30 दिन · 1,240 टन कुल':'Delhi NCR · Last 30 days · 1,240 tonnes total'}</div>
+        <div class="donut-wrap">
+          <svg class="donut-svg" width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="var(--border)" stroke-width="16"/>
+            ${paths}
+            <text x="60" y="57" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">1,240t</text>
+            <text x="60" y="70" text-anchor="middle" font-size="9" fill="var(--ink-3)">${hi?'कुल':'total'}</text>
+          </svg>
+          <div class="donut-legend">
+            ${segments.map(s=>`
+              <div class="legend-row">
+                <div class="legend-dot" style="background:${s.color}"></div>
+                <div class="legend-lbl">${hi?s.label_hi:s.label_en}</div>
+                <div class="legend-pct">${s.pct}%</div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>`;
+  } else if(currentATab === 'trend') {
+    const months = hi
+      ? ['अक्टू','नव','दिस','जन','फर','मार','अप्र','मई']
+      : ['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May'];
+    const vals = [820,950,1100,880,760,1050,1180,1240];
+    const maxV = Math.max(...vals), minV = Math.min(...vals);
+    const W=320,H=80,pad=10;
+    const pts = vals.map((v,i)=>{
+      const x=pad+i*(W-2*pad)/(vals.length-1);
+      const y=H-pad-(v-minV)/(maxV-minV)*(H-2*pad);
+      return `${x},${y}`;
+    }).join(' ');
+    const areaBot = `${pad},${H-pad} ${pts} ${W-pad},${H-pad}`;
+    el.innerHTML = `
+      <div class="analytics-chart">
+        <div class="ac-title">${hi?'मासिक कचरा मात्रा (टन)':'Monthly Waste Volume (tonnes)'}</div>
+        <div class="ac-sub">${hi?'सभी प्रकार · दिल्ली NCR':'All types · Delhi NCR'}</div>
+        <svg width="100%" viewBox="0 0 ${W} ${H+20}" style="margin-top:8px;overflow:visible">
+          <defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6D28D9" stop-opacity=".25"/><stop offset="100%" stop-color="#6D28D9" stop-opacity="0"/></linearGradient></defs>
+          <polygon points="${areaBot}" fill="url(#areaGrad)"/>
+          <polyline points="${pts}" fill="none" stroke="#6D28D9" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          ${vals.map((v,i)=>{
+            const x=pad+i*(W-2*pad)/(vals.length-1);
+            const y=H-pad-(v-minV)/(maxV-minV)*(H-2*pad);
+            return `<circle cx="${x}" cy="${y}" r="3" fill="#6D28D9"/><text x="${x}" y="${H+14}" text-anchor="middle" font-size="8" fill="var(--ink-4)">${months[i]}</text>`;
+          }).join('')}
+        </svg>
+      </div>`;
+  } else if(currentATab === 'hotspots') {
+    const wards = [
+      {name:'Ward 12 — Sector 67',score:87,color:'#DC2626'},
+      {name:'Ward 14 — Sector 69',score:74,color:'#F59E0B'},
+      {name:'Ward 17 — DLF Phase 5',score:61,color:'#F59E0B'},
+      {name:'Ward 13 — Sector 68',score:45,color:'#16A34A'},
+      {name:'Ward 15 — Sector 70',score:38,color:'#16A34A'},
+      {name:'Ward 16 — Sector 71',score:22,color:'#16A34A'},
+    ];
+    el.innerHTML = `
+      <div class="analytics-chart">
+        <div class="ac-title">${hi?'वार्ड हॉटस्पॉट स्कोर':'Ward Hotspot Score'}</div>
+        <div class="ac-sub">${hi?'उच्च = अधिक शिकायत घनत्व':'Higher = more complaint density'}</div>
+        <div style="margin-top:10px">
+          ${wards.map(w=>`
+            <div class="sla-row">
+              <div class="sla-label" style="font-size:11px">${w.name}</div>
+              <div class="sla-bar-wrap" style="width:90px"><div class="sla-bar-fill" style="width:${w.score}%;background:${w.color}"></div></div>
+              <div class="sla-pct" style="color:${w.color}">${w.score}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  } else {
+    const cols = [
+      {label_en:'Top Kabadis',label_hi:'शीर्ष कबाड़ी',val:'124',sub_en:'active this month',sub_hi:'इस माह सक्रिय',color:'#6D28D9'},
+      {label_en:'Avg. Pickups/day',label_hi:'औसत पिकअप/दिन',val:'34',sub_en:'per collector',sub_hi:'प्रति संग्रहक',color:'#059669'},
+      {label_en:'New Enrollments',label_hi:'नए नामांकन',sub_en:'this month',sub_hi:'इस माह',val:'18',color:'#2563EB'},
+      {label_en:'Avg Rating',label_hi:'औसत रेटिंग',val:'4.6★',sub_en:'all collectors',sub_hi:'सभी संग्रहक',color:'#D97706'},
+    ];
+    el.innerHTML = `
+      <div class="stat-card-grid" style="margin-top:12px">
+        ${cols.map(c=>`
+          <div class="stat-card">
+            <div class="stat-card-val" style="color:${c.color}">${c.val}</div>
+            <div class="stat-card-lbl">${hi?c.label_hi:c.label_en}</div>
+            <div class="stat-card-trend neu">${hi?c.sub_hi:c.sub_en}</div>
+          </div>`).join('')}
+      </div>
+      <div class="analytics-chart" style="margin-top:0">
+        <div class="ac-title">${hi?'साप्ताहिक गतिविधि हीटमैप':'Weekly Activity Heatmap'}</div>
+        <div class="ac-sub">${hi?'गहरा = अधिक पिकअप':'Darker = more pickups'}</div>
+        <div style="display:flex;gap:3px;margin-top:6px">
+          ${['M','T','W','T','F','S','S'].map(d=>`<div style="flex:1;font-size:8px;color:var(--ink-4);text-align:center">${d}</div>`).join('')}
+        </div>
+        <div class="heatmap-grid">
+          ${Array.from({length:28},(_,i)=>{
+            const intensity=Math.random();
+            const alpha=(0.15+intensity*0.85).toFixed(2);
+            return `<div class="hm-cell" style="background:rgba(109,40,217,${alpha})" title="${Math.round(intensity*40)+5} pickups"></div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// PHASE 2 — COLLECTOR WELFARE
+// ═══════════════════════════════════════════════════════
+const welfareSchemes = [
+  {icon:'🛡️',title_en:'PMSBY — Accident Insurance',title_hi:'PMSBY — दुर्घटना बीमा',sub_en:'₹2 lakh cover · ₹12/year premium · Govt. scheme',sub_hi:'₹2 लाख कवर · ₹12/वर्ष प्रीमियम',tag:'wtag-gov',tag_lbl_en:'Govt.',tag_lbl_hi:'सरकारी',iconBg:'#DBEAFE'},
+  {icon:'❤️',title_en:'PMJJBY — Life Insurance',title_hi:'PMJJBY — जीवन बीमा',sub_en:'₹2 lakh cover · ₹436/year · Age 18–50',sub_hi:'₹2 लाख कवर · ₹436/वर्ष · आयु 18–50',tag:'wtag-gov',tag_lbl_en:'Govt.',tag_lbl_hi:'सरकारी',iconBg:'#FEE2E2'},
+  {icon:'🏥',title_en:'Ayushman Bharat — Health',title_hi:'आयुष्मान भारत — स्वास्थ्य',sub_en:'₹5 lakh/year hospital cover · Free for eligible',sub_hi:'₹5 लाख/वर्ष अस्पताल कवर · पात्र के लिए मुफ्त',tag:'wtag-free',tag_lbl_en:'Free',tag_lbl_hi:'निःशुल्क',iconBg:'#DCFCE7'},
+  {icon:'💰',title_en:'MFI Credit Referral',title_hi:'MFI क्रेडिट रेफरल',sub_en:'Income cert. used for loan of ₹25k–₹2L · No collateral',sub_hi:'आय प्रमाण से ₹25k–₹2L ऋण · बिना गारंटी',tag:'wtag-new',tag_lbl_en:'New',tag_lbl_hi:'नया',iconBg:'#FEF3C7'},
+  {icon:'📱',title_en:'Phone / Data Subsidy',title_hi:'फोन / डेटा सब्सिडी',sub_en:'Certified collectors eligible for ₹1,500 device allowance',sub_hi:'प्रमाणित संग्रहकों के लिए ₹1,500 डिवाइस भत्ता',tag:'wtag-gov',tag_lbl_en:'Scheme',tag_lbl_hi:'योजना',iconBg:'#F5F3FF'},
+];
+
+const trainingCourses = [
+  {icon:'♻️',title_en:'Safe Waste Segregation',title_hi:'सुरक्षित कचरा अलगाव',meta_en:'NSDC · 4 hrs · Free · Certificate',meta_hi:'NSDC · 4 घंटे · निःशुल्क · प्रमाण पत्र',progress:65},
+  {icon:'📱',title_en:'Using SwachhConnect App',title_hi:'SwachhConnect ऐप उपयोग',meta_en:'In-app · 1 hr · Hindi / English',meta_hi:'इन-ऐप · 1 घंटा · हिंदी / अंग्रेज़ी',progress:100},
+  {icon:'🧪',title_en:'Biomedical Waste Handling',title_hi:'बायोमेडिकल कचरा प्रबंधन',meta_en:'CPCB · 8 hrs · Certification required',meta_hi:'CPCB · 8 घंटे · प्रमाणन आवश्यक',progress:0},
+  {icon:'💼',title_en:'Financial Literacy',title_hi:'वित्तीय साक्षरता',meta_en:'NABARD · 2 hrs · Hindi · Free',meta_hi:'NABARD · 2 घंटे · हिंदी · निःशुल्क',progress:30},
+];
+
+function renderWelfareSchemes() {
+  const el = document.getElementById('welfare-schemes-list');
+  if(!el) return;
+  const hi = currentLang==='hi';
+  el.innerHTML = welfareSchemes.map(s=>`
+    <div class="welfare-card" onclick="showToast('${hi?s.title_hi:s.title_en}','${hi?s.sub_hi:s.sub_en}')">
+      <div class="welfare-card-icon" style="background:${s.iconBg}">${s.icon}</div>
+      <div class="welfare-card-body">
+        <div class="welfare-card-title">${hi?s.title_hi:s.title_en}</div>
+        <div class="welfare-card-sub">${hi?s.sub_hi:s.sub_en}</div>
+      </div>
+      <div class="welfare-card-right">
+        <span class="welfare-tag ${s.tag}">${hi?s.tag_lbl_hi:s.tag_lbl_en}</span>
+        <span class="welfare-arrow">›</span>
+      </div>
+    </div>`).join('');
+}
+
+function renderTrainingCourses() {
+  const el = document.getElementById('welfare-training-list');
+  if(!el) return;
+  const hi = currentLang==='hi';
+  el.innerHTML = trainingCourses.map(c=>`
+    <div class="training-card">
+      <div class="training-thumb">${c.icon}</div>
+      <div class="training-info">
+        <div class="training-title">${hi?c.title_hi:c.title_en}</div>
+        <div class="training-meta">${hi?c.meta_hi:c.meta_en}</div>
+        ${c.progress>0?`<div class="training-prog"><div class="training-prog-fill" style="width:${c.progress}%"></div></div>`:''}
+      </div>
+      <button class="training-enroll-btn" onclick="showToast('${hi?c.title_hi:c.title_en}','${c.progress===100?(hi?'पूर्ण!':'Completed!'):(hi?'NSDC पोर्टल पर खुलता है':'Opens on NSDC portal')}')">
+        ${c.progress===100?(hi?'✓ पूर्ण':'✓ Done'):c.progress>0?(hi?'जारी':'Resume'):(hi?'शुरू करें':'Start')}
+      </button>
+    </div>`).join('');
+}
+
+function applyMyRequestsTranslations() {
+  const hi = currentLang==='hi';
+  const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
+  set('mr-title', hi?'मेरे अनुरोध':'My Requests');
+  set('mr-subtitle', hi?'आपकी सभी शिकायतें':'All complaints you\'ve filed');
+  set('mr-s-total-lbl', hi?'कुल दर्ज':'Total Filed');
+  set('mr-s-open-lbl', hi?'प्रगति में':'In Progress');
+  set('mr-s-resolved-lbl', hi?'हल हुई':'Resolved');
+  set('mrf-all', hi?'सभी':'All');
+  set('mrf-open', hi?'खुले':'Open');
+  set('mrf-inprogress', hi?'प्रगति में':'In Progress');
+  set('mrf-resolved', hi?'हल हुए':'Resolved');
+  set('mr-login-title', hi?'अपने अनुरोध देखने के लिए लॉगिन करें':'Login to see your requests');
+  set('mr-login-sub', hi?'आपकी शिकायत इतिहास, टिकट स्थिति लॉगिन के बाद उपलब्ध है।':'Your complaint history and ticket status are available after login.');
+  set('mr-login-btn', hi?'लॉगिन / साइन अप':'Login / Sign Up');
+  renderRequests();
+  applyLoginTranslations();
+}
+
+// ─── PHASE 2 NAV LABELS (called from applyTranslationsP2 below) ───────────────
+function applyP2Translations() {
+  const setTxt = (id,txt) => { const e=document.getElementById(id); if(e) e.textContent=txt; };
+  setTxt('nav-lbl-ulb', T('nav_ulb'));
+  setTxt('nav-lbl-biomedical', T('nav_biomedical'));
+  setTxt('nav-lbl-analytics', T('nav_analytics'));
+  setTxt('nav-lbl-welfare', T('nav_welfare'));
+  const hi = currentLang==='hi';
+  setTxt('nav-lbl-myrequests', hi?'मेरी रिपोर्ट':'My Requests');
+  setTxt('hdr-login-btn', hi?'लॉगिन':'Login');
+  applyMyRequestsTranslations();
+  renderTickets();
+  renderULBChart();
+  renderSLARows();
+  renderBioManifests();
+  renderAnalytics();
+  renderWelfareSchemes();
+  renderTrainingCourses();
+}
+
+// ═══════════════════════════════════════════════════════
+// AUTH / LOGIN
+// ═══════════════════════════════════════════════════════
+const currentUser = { loggedIn: false, name: '', phone: '', initials: '' };
+let loginCallback = null; // fn to call after successful login
+
+function showLoginModal(cb) {
+  loginCallback = cb || null;
+  goLoginStep(1);
+  document.getElementById('login-overlay').classList.add('show');
+  // Reset OTP fields
+  for(let i=0;i<6;i++){const o=document.getElementById('l-otp'+i);if(o)o.value='';}
+  document.getElementById('l-phone').value='';
+  document.getElementById('l-name').value='';
+  document.getElementById('ls1-btn').disabled=true;
+  document.getElementById('ls2-btn').disabled=true;
+  applyLoginTranslations();
+}
+function closeLoginModal() {
+  document.getElementById('login-overlay').classList.remove('show');
+  loginCallback = null;
+}
+function closeLoginOnOverlay(e) {
+  if(e.target === document.getElementById('login-overlay')) closeLoginModal();
+}
+function goLoginStep(n) {
+  document.querySelectorAll('.login-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('ls-'+n).classList.add('active');
+}
+function checkLoginPhone() {
+  const p = (document.getElementById('l-phone').value||'').replace(/\s/g,'');
+  const nm = (document.getElementById('l-name').value||'').trim();
+  document.getElementById('ls1-btn').disabled = !(p.length===10 && nm.length>1);
+}
+function sendLoginOTP() {
+  const phone = document.getElementById('l-phone').value;
+  const hi = currentLang==='hi';
+  document.getElementById('ls2-sub').textContent = (hi?'6 अंकों का कोड +91 ':'6-digit code sent to +91 ')+phone.slice(0,5)+'XXXXX'+(hi?' पर भेजा गया।':'.');
+  showToast(hi?'OTP भेजा गया':'OTP Sent', hi?'डेमो OTP: 1 2 3 4 5 6':'Demo OTP: 1 2 3 4 5 6');
+  goLoginStep(2);
+  setTimeout(()=>document.getElementById('l-otp0').focus(),200);
+}
+function loginOtpNext(el, idx) {
+  el.value = el.value.replace(/[^0-9]/g,'').slice(-1);
+  if(el.value && idx < 5) document.getElementById('l-otp'+(idx+1)).focus();
+  const vals = [0,1,2,3,4,5].map(i=>document.getElementById('l-otp'+i).value);
+  const full = vals.every(v=>v!=='');
+  document.getElementById('ls2-btn').disabled = !full;
+  if(full && vals.join('')==='123456') setTimeout(()=>verifyLoginOTP(), 300);
+}
+function verifyLoginOTP() {
+  const name = document.getElementById('l-name').value.trim();
+  const phone = document.getElementById('l-phone').value;
+  const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('ls3-name-display').textContent = name;
+  document.getElementById('ls3-phone-display').textContent = '+91 '+phone.slice(0,5)+'XXXXX';
+  document.getElementById('ls3-avatar').textContent = initials || '👤';
+  goLoginStep(3);
+}
+function completeLogin() {
+  const name = document.getElementById('l-name').value.trim();
+  const phone = document.getElementById('l-phone').value;
+  currentUser.loggedIn = true;
+  currentUser.name = name;
+  currentUser.phone = phone;
+  currentUser.initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)||'U';
+  // Update header
+  document.getElementById('login-btn-wrap').style.display='none';
+  document.getElementById('login-user-bar').style.display='flex';
+  document.getElementById('hdr-avatar').textContent = currentUser.initials;
+  document.getElementById('hdr-username').textContent = name.split(' ')[0];
+  closeLoginModal();
+  updateMyRequestsView();
+  updateReportLoginHint();
+  if(loginCallback) { loginCallback(); loginCallback=null; }
+  const hi = currentLang==='hi';
+  showToast(hi?'लॉगिन हो गया!':'Logged in!', (hi?'स्वागत है, ':'Welcome, ')+name.split(' ')[0]);
+}
+
+function applyLoginTranslations() {
+  const hi = currentLang==='hi';
+  const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
+  const setph=(id,t)=>{const e=document.getElementById(id);if(e)e.placeholder=t;};
+  set('ls1-title', hi?'SwachhConnect में लॉगिन करें':'Login to SwachhConnect');
+  set('ls1-sub', hi?'OTP के लिए अपना मोबाइल नंबर दर्ज करें।':'Enter your mobile number to receive a one-time password.');
+  set('ls1-lbl-ph', hi?'मोबाइल नंबर':'Mobile Number');
+  set('ls1-lbl-name', hi?'आपका नाम':'Your Name');
+  set('ls1-btn-lbl', hi?'OTP भेजें →':'Send OTP →');
+  set('ls1-skip', hi?'रद्द करें':'Cancel');
+  set('ls2-title', hi?'OTP दर्ज करें':'Enter OTP');
+  const hint2 = document.getElementById('ls2-hint');
+  if(hint2) hint2.innerHTML = (hi?'डेमो OTP: ':'Demo OTP: ')+'<strong>1 2 3 4 5 6</strong>';
+  set('ls2-resend', hi?'OTP दोबारा भेजें':'Resend OTP');
+  set('ls2-btn-lbl', hi?'सत्यापित करें →':'Verify & Login →');
+  set('ls3-title', hi?'लॉगिन हो गया!':'You\'re logged in!');
+  set('ls3-sub', hi?'स्वागत है! अब आप रिपोर्ट दर्ज कर सकते हैं।':'Welcome back. You can now submit reports and track complaints.');
+  set('ls3-btn-lbl', hi?'आगे बढ़ें →':'Continue →');
+  setph('l-name', hi?'आधार कार्ड पर जैसा है':'As on Aadhaar card');
+}
+
+function goToMyRequests() {
+  resetReport();
+  showScreen('myrequests');
+}
+
+function updateReportLoginHint() {
+  const hint = document.getElementById('rep-login-hint');
+  const loggedHint = document.getElementById('rep-logged-in-hint');
+  const userNameEl = document.getElementById('rep-user-name');
+  if(!hint || !loggedHint) return;
+  const hi = currentLang === 'hi';
+  if(currentUser.loggedIn) {
+    hint.style.display = 'none';
+    loggedHint.style.display = 'block';
+    if(userNameEl) userNameEl.textContent = currentUser.name.split(' ')[0];
+  } else {
+    hint.style.display = 'flex';
+    loggedHint.style.display = 'none';
+    const hintTxt = document.getElementById('rep-login-hint-txt');
+    if(hintTxt) hintTxt.textContent = hi ? 'सबमिट करने के लिए लॉगिन आवश्यक · टैप करें' : 'Login required to submit · Tap to login';
+  }
+}
+
+// Guard: require login before submitting report
+function guardedSubmitReport() {
+  if(!currentUser.loggedIn) {
+    showLoginModal(()=>submitReport());
+  } else {
+    submitReport();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// MY REQUESTS
+// ═══════════════════════════════════════════════════════
+const myRequests = [
+  {id:'DL-2026-04912',type_en:'Dead Animal',type_hi:'मृत पशु',icon:'🐕',loc_en:'M3M Gate 2, Sector 67',loc_hi:'CR पार्क मार्केट गेट 3',date:'Today, 10:18 AM',status:'urgent',progress:20,sla_en:'Field team dispatched · ETA 45 min',sla_hi:'फील्ड टीम भेजी · ETA 45 मिनट'},
+  {id:'DL-2026-04871',type_en:'Open Garbage',type_hi:'खुला कचरा',icon:'♻️',loc_en:'Southern Periphery Road, Sector 67',loc_hi:'साउदर्न पेरिफेरी रोड, सेक्टर 67',date:'Today, 8:42 AM',status:'inprogress',progress:60,sla_en:'Sanitation team en route · Within 2 hrs',sla_hi:'सफाई टीम रास्ते में · 2 घंटे में'},
+  {id:'DL-2026-04803',type_en:'Illegal Dumping',type_hi:'अवैध डंपिंग',icon:'🗑️',loc_en:'Near Sector 67 HUDA Metro Station',loc_hi:'सेक्टर 67 HUDA मेट्रो स्टेशन के पास',date:'Yesterday, 3:10 PM',status:'inprogress',progress:45,sla_en:'Under investigation · Notice issued to violator',sla_hi:'जांच जारी · उल्लंघनकर्ता को नोटिस'},
+  {id:'DL-2026-04756',type_en:'Hospital Waste',type_hi:'अस्पताल कचरा',icon:'🧪',loc_en:'Opp. Medanta OPD, Sector 38',loc_hi:'मेदांता OPD के सामने, सेक्टर 38',date:'22 Mar, 11:00 AM',status:'resolved',progress:100,sla_en:'Resolved in 2h 14m · CPCB handler engaged',sla_hi:'2 घंटे 14 मिनट में हल · CPCB हैंडलर'},
+  {id:'DL-2026-04688',type_en:'Chemical Spill',type_hi:'रासायनिक रिसाव',icon:'☣️',loc_en:'IMT Manesar Block F',loc_hi:'IMT मानेसर ब्लॉक F',date:'20 Mar, 9:22 AM',status:'resolved',progress:100,sla_en:'Resolved in 3h 05m · PCB alerted',sla_hi:'3 घंटे 5 मिनट में हल · PCB सतर्क'},
+  {id:'DL-2026-04601',type_en:'Debris on Road',type_hi:'सड़क पर मलबा',icon:'🧱',loc_en:'New Construction Site, Sector 68',loc_hi:'नया निर्माण स्थल, सेक्टर 68',date:'18 Mar, 2:15 PM',status:'resolved',progress:100,sla_en:'Cleared in 5h 30m',sla_hi:'5 घंटे 30 मिनट में साफ'},
+  {id:'DL-2026-04502',type_en:'Open Garbage',type_hi:'खुला कचरा',icon:'♻️',loc_en:'Near HP Petrol Pump, Sohna Road',loc_hi:'सोहना रोड HP पेट्रोल पंप के पास',date:'15 Mar, 7:48 AM',status:'resolved',progress:100,sla_en:'Resolved in 1h 55m',sla_hi:'1 घंटे 55 मिनट में हल'},
+];
+
+const rStatusLabEn = {urgent:'Urgent',inprogress:'In Progress',open:'Open',resolved:'Resolved'};
+const rStatusLabHi = {urgent:'तत्काल',inprogress:'प्रगति में',open:'खुला',resolved:'हल हुआ'};
+const rStatusCls   = {urgent:'rsb-urgent',inprogress:'rsb-progress',open:'rsb-open',resolved:'rsb-resolved'};
+const rBarColor    = {urgent:'#EF4444',inprogress:'#3B82F6',open:'#F59E0B',resolved:'#22C55E'};
+
+let currentReqFilter = 'all';
+function filterRequests(f, el) {
+  document.querySelectorAll('.mr-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  currentReqFilter = f;
+  renderRequests();
+}
+
+function renderRequests() {
+  const el = document.getElementById('requests-list');
+  if(!el) return;
+  const hi = currentLang==='hi';
+  const filtered = currentReqFilter==='all' ? myRequests
+    : myRequests.filter(r=> currentReqFilter==='resolved' ? r.status==='resolved'
+      : currentReqFilter==='open' ? r.status==='open'
+      : currentReqFilter==='inprogress' ? (r.status==='inprogress'||r.status==='urgent') : true);
+  if(!filtered.length){
+    el.innerHTML=`<div class="mr-empty">
+      <div class="mr-empty-icon">📭</div>
+      <div class="mr-empty-title">${hi?'कोई अनुरोध नहीं':'No requests found'}</div>
+      <div class="mr-empty-sub">${hi?'इस श्रेणी में कोई शिकायत नहीं मिली।':'No complaints in this category.'}</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(r=>`
+    <div class="request-card" onclick="expandRequest('${r.id}')">
+      <div class="request-card-header">
+        <div>
+          <div class="request-type">${r.icon} ${hi?r.type_hi:r.type_en}</div>
+          <div class="request-id">${r.id}</div>
+        </div>
+        <span class="request-status-badge ${rStatusCls[r.status]}">${hi?rStatusLabHi[r.status]:rStatusLabEn[r.status]}</span>
+      </div>
+      <div class="request-meta-row">
+        <div class="request-location"><span>📍</span><span class="request-loc-txt">${hi?r.loc_hi:r.loc_en}</span></div>
+        <div class="request-time">${r.date}</div>
+      </div>
+      <div class="request-progress-bar">
+        <div class="request-progress-fill" style="width:${r.progress}%;background:${rBarColor[r.status]}"></div>
+      </div>
+      <div class="request-sla">⏱ <span>${hi?r.sla_hi:r.sla_en}</span></div>
+      ${r.status !== 'resolved' ? `
+      <div class="request-actions">
+        <button class="req-action-btn req-btn-track" onclick="event.stopPropagation();showToast('${hi?'ट्रैकिंग':'Tracking'}','${r.id} · ${hi?'फील्ड टीम से लाइव अपडेट':'Live update from field team'}')">${hi?'📍 ट्रैक करें':'📍 Track'}</button>
+        <button class="req-action-btn req-btn-escalate" onclick="event.stopPropagation();escalateRequest('${r.id}')">${hi?'⚠️ एस्केलेट':'⚠️ Escalate'}</button>
+        <button class="req-action-btn req-btn-close" onclick="event.stopPropagation();closeRequest('${r.id}')">${hi?'✓ बंद करें':'✓ Close'}</button>
+      </div>` : `
+      <div class="request-actions">
+        <button class="req-action-btn req-btn-track" onclick="event.stopPropagation();showToast('${hi?'रेट करें':'Rate it'}','${hi?'फीडबैक देने के लिए धन्यवाद!':'Thank you for your feedback!'}')">${hi?'⭐ रेट करें':'⭐ Rate'}</button>
+        <button class="req-action-btn req-btn-escalate" onclick="event.stopPropagation();showToast('${hi?'रिपोर्ट':'Report'}','${hi?'नई रिपोर्ट पर जाएं':'Navigating to new report'}')" style="color:var(--green);border-color:var(--green)">${hi?'+ दोबारा रिपोर्ट':'+ Re-report'}</button>
+      </div>`}
+    </div>`).join('');
+}
+
+function expandRequest(id) {
+  const r = myRequests.find(x=>x.id===id);
+  if(!r) return;
+  const hi = currentLang==='hi';
+  showToast(hi?r.type_hi:r.type_en, r.id+' · '+(hi?r.sla_hi:r.sla_en));
+}
+function escalateRequest(id) {
+  const hi = currentLang==='hi';
+  showToast(hi?'एस्केलेट किया गया':'Escalated', (hi?'शिकायत वार्ड पार्षद को भेजी गई: ':'Complaint escalated to Ward Councillor: ')+id);
+}
+function closeRequest(id) {
+  const hi = currentLang==='hi';
+  const r = myRequests.find(x=>x.id===id);
+  if(r){ r.status='resolved'; r.progress=100; r.sla_en='Closed by citizen'; r.sla_hi='नागरिक ने बंद किया'; }
+  renderRequests();
+  showToast(hi?'बंद किया गया':'Closed', id);
+}
+
+function updateMyRequestsView() {
+  const loggedOut = document.getElementById('myrequests-logged-out');
+  const content = document.getElementById('myrequests-content');
+  if(!loggedOut || !content) return;
+  if(currentUser.loggedIn) {
+    loggedOut.style.display='none';
+    content.style.display='block';
+    renderRequests();
+  } else {
+    loggedOut.style.display='block';
+    content.style.display='none';
+  }
+}
+
+function submitReport() {
+  // Add new report to myRequests list
+  const typeEl = document.querySelector('.type-chip.selected');
+  const locEl = document.getElementById('loc-input');
+  const typeText = typeEl ? typeEl.textContent.trim() : 'Issue';
+  const loc = locEl ? locEl.value || 'Location not specified' : '';
+  const num = 'DL-2026-0' + Math.floor(40000 + Math.random() * 9999);
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true});
+  const hi = currentLang==='hi';
+  const newReq = {
+    id: num,
+    type_en: typeText, type_hi: typeText,
+    icon: typeEl ? typeEl.textContent.trim().split(' ')[0] : '🚨',
+    loc_en: loc||'Current location', loc_hi: loc||'वर्तमान स्थान',
+    date: 'Today, '+timeStr,
+    status:'urgent', progress:10,
+    sla_en:'Report received · Field team being assigned',
+    sla_hi:'रिपोर्ट मिली · फील्ड टीम असाइन हो रही है'
+  };
+  myRequests.unshift(newReq);
+  document.getElementById('ticket-num').textContent = num;
+  document.getElementById('success-overlay').classList.add('show');
+  // Update summary counts
+  const openCount = myRequests.filter(r=>r.status!=='resolved').length;
+  const resolvedCount = myRequests.filter(r=>r.status==='resolved').length;
+  const el1=document.getElementById('mr-s-total');
+  const el2=document.getElementById('mr-s-open');
+  const el3=document.getElementById('mr-s-resolved');
+  if(el1) el1.textContent = myRequests.length;
+  if(el2) el2.textContent = openCount;
+  if(el3) el3.textContent = resolvedCount;
+}
+
+// INIT
+applyTranslations();   // Phase 0 translations
+applyP2Translations(); // Phase 2 translations + renders
+renderCollectors('all');
+renderRates('Delhi');
+
+// Override setLang to also refresh Phase 2 content after language switch
+const _baseLang = setLang;
+setLang = function(lang) {
+  currentLang = lang;
+  document.getElementById('btn-en').classList.toggle('active', lang==='en');
+  document.getElementById('btn-hi').classList.toggle('active', lang==='hi');
+  const sel = document.getElementById('e-lang');
+  if(sel) sel.value = lang === 'hi' ? 'hi' : 'en';
+  applyTranslations();
+  applyP2Translations();
+  const phone = document.getElementById('phone');
+  phone.style.transition='opacity 0.2s';
+  phone.style.opacity='0.85';
+  setTimeout(()=>phone.style.opacity='1',200);
+};
+
+// Override showScreen to init Phase 2 screens on first visit
+const _baseShow = showScreen;
+showScreen = function(name, filter) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const s = document.getElementById('screen-'+name);
+  if(s) s.classList.add('active');
+  const nb = document.getElementById('nav-'+name);
+  if(nb) nb.classList.add('active');
+  if(name==='collectors') {
+    const cat = filter || currentFilter || 'all';
+    currentFilter = cat;
+    document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+    const chip = document.getElementById('fc-'+cat);
+    if(chip) chip.classList.add('active');
+    renderCollectors(cat);
+    const sc = document.getElementById('screen-collectors');
+    if(sc) setTimeout(()=>sc.scrollTop=0, 50);
+  }
+  if(name==='report') updateReportLoginHint();
+  if(name==='rates') renderRates(currentCity||'Delhi');
+  if(name==='myrequests') { updateMyRequestsView(); applyMyRequestsTranslations(); }
+  if(name==='ulb'){ renderTickets(); renderULBChart(); renderSLARows(); }
+  if(name==='biomedical'){ renderBioManifests(); }
+  if(name==='analytics'){ renderAnalytics(); }
+  if(name==='welfare'){ renderWelfareSchemes(); renderTrainingCourses(); }
+};
+</script>
+</body>
+</html>
